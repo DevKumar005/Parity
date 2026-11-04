@@ -404,4 +404,3 @@ def repair_loop(
     migrated_path.write_text(current_code, encoding="utf-8")
 
     return current_code, current_rate, patch_history, current_mismatches
-

@@ -166,4 +166,3 @@ def triage_quirks(
 
     console.print(table)
     return quirk_entries, contract_rules
-

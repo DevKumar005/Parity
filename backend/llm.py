@@ -705,4 +705,3 @@ class LLMClient:
         inp = sum(e.input_tokens for e in self._ledger)
         out = sum(e.output_tokens for e in self._ledger)
         return inp, out
-

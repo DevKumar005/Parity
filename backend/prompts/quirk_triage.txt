@@ -9,4 +9,3 @@ Classification Labels:
 Deliverables:
 1. Quirk Table: Categorized list of preserved quirks with evidence inputs and recommended human actions.
 2. Behavior Contract: Numbered, plain-English rules backed by concrete inputs and expected outputs.
-

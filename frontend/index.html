@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Parity — Autonomous Billing Migration & Behavioral Equivalence Verification</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
@@ -22,15 +25,25 @@
       --accent: #2563eb;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
       height: 100%;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg);
       color: var(--ink);
       -webkit-font-smoothing: antialiased;
     }
-    code, pre { font-family: 'JetBrains Mono', monospace; }
+
+    code,
+    pre {
+      font-family: 'JetBrains Mono', monospace;
+    }
 
     /* Navigation styling */
     .nav-btn {
@@ -45,21 +58,23 @@
       border-radius: 999px;
       position: relative;
     }
+
     .nav-btn:hover {
       color: #000000;
       background-color: rgba(0, 0, 0, 0.04);
     }
+
     .nav-btn.active {
       color: #000000;
       font-weight: 600;
       background-color: rgba(0, 0, 0, 0.06);
     }
 
-    /* Rainbow Underglow CTA (Kindred Spec) */
     .cta-wrapper {
       display: inline-block;
       position: relative;
     }
+
     .cta-glow {
       position: absolute;
       left: 10%;
@@ -73,6 +88,7 @@
       transition: all 0.3s ease;
       pointer-events: none;
     }
+
     .cta-pill {
       position: relative;
       background: #111111;
@@ -88,11 +104,13 @@
       cursor: pointer;
       border: 1px solid rgba(255, 255, 255, 0.12);
     }
+
     .cta-wrapper:hover .cta-pill {
       transform: translateY(-1px);
       background: #000000;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
     }
+
     .cta-wrapper:hover .cta-glow {
       opacity: 1;
       filter: blur(12px);
@@ -105,27 +123,34 @@
       border: 1px solid var(--border);
       background: #ffffff;
     }
+
     .step-card.stepper-active {
       border-color: #0284c7;
       box-shadow: 0 0 14px rgba(2, 132, 199, 0.28);
       transform: translateY(-2px);
       background: #f0f9ff;
     }
+
     .step-card.stepper-done {
       border-color: #16a34a;
       background: #f0fdf4;
     }
 
     /* Code Container & Scrollbars */
-    pre::-webkit-scrollbar, div::-webkit-scrollbar {
+    pre::-webkit-scrollbar,
+    div::-webkit-scrollbar {
       height: 6px;
       width: 6px;
     }
-    pre::-webkit-scrollbar-thumb, div::-webkit-scrollbar-thumb {
+
+    pre::-webkit-scrollbar-thumb,
+    div::-webkit-scrollbar-thumb {
       background: #d4d4ce;
       border-radius: 4px;
     }
-    pre::-webkit-scrollbar-thumb:hover, div::-webkit-scrollbar-thumb:hover {
+
+    pre::-webkit-scrollbar-thumb:hover,
+    div::-webkit-scrollbar-thumb:hover {
       background: #bcbcb5;
     }
 
@@ -136,6 +161,7 @@
     }
   </style>
 </head>
+
 <body class="flex flex-col min-h-screen">
 
   <!-- ========================================================================= -->
@@ -143,15 +169,15 @@
   <!-- ========================================================================= -->
   <header class="w-full border-b border-[#e8e8e3] bg-[#f7f7f5]/90 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
-      
+
       <!-- Brand Logo -->
       <div class="flex items-center space-x-3 cursor-pointer" onclick="showView('hero')">
-        <div class="w-8 h-8 rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-sm tracking-tight shadow-sm">
+        <div
+          class="w-8 h-8 rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-sm tracking-tight shadow-sm">
           P
         </div>
         <div class="flex items-center space-x-2">
           <span class="font-semibold text-[15px] tracking-tight text-[#111111]">Parity</span>
-          <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#e8e8e3] text-[#555555]">v0.1.0</span>
         </div>
       </div>
 
@@ -166,11 +192,11 @@
 
       <!-- Right Action Area -->
       <div class="flex items-center space-x-3">
-        <div id="providerStatusBadge" class="hidden sm:flex items-center space-x-1.5 text-xs text-[#555555] bg-[#eaeae5] px-3 py-1 rounded-full font-mono">
+        <div id="providerStatusBadge"
+          class="hidden sm:flex items-center space-x-1.5 text-xs text-[#555555] bg-[#eaeae5] px-3 py-1 rounded-full font-mono">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Muse Spark Open · Active</span>
         </div>
-        
+
         <div class="cta-wrapper">
           <div class="cta-glow"></div>
           <button onclick="showView('studio')" class="cta-pill text-xs py-2 px-3.5">
@@ -184,139 +210,148 @@
 
     <!-- Mobile Sub-Navigation Bar -->
     <div class="flex md:hidden overflow-x-auto px-4 py-2 border-t border-[#e8e8e3] space-x-2 bg-[#f7f7f5]">
-      <button class="nav-btn active text-xs whitespace-nowrap" id="mob-hero" onclick="showView('hero')">Overview</button>
+      <button class="nav-btn active text-xs whitespace-nowrap" id="mob-hero"
+        onclick="showView('hero')">Overview</button>
       <button class="nav-btn text-xs whitespace-nowrap" id="mob-studio" onclick="showView('studio')">Studio</button>
       <button class="nav-btn text-xs whitespace-nowrap" id="mob-quirks" onclick="showView('quirks')">Quirks</button>
-      <button class="nav-btn text-xs whitespace-nowrap" id="mob-benchmarks" onclick="showView('benchmarks')">Benchmarks</button>
+      <button class="nav-btn text-xs whitespace-nowrap" id="mob-benchmarks"
+        onclick="showView('benchmarks')">Benchmarks</button>
       <button class="nav-btn text-xs whitespace-nowrap" id="mob-runs" onclick="showView('runs')">Evidence</button>
     </div>
   </header>
 
-  <!-- ========================================================================= -->
-  <!-- VIEW 1: HERO HOMEPAGE (DOT-MATRIX HANDS CANVAS HERO)                      -->
-  <!-- ========================================================================= -->
+  <!-- VIEW 1: HERO HOMEPAGE (DOT-MATRIX HANDS CANVAS HERO)
   <main id="view-hero" class="view-panel flex-1 flex flex-col">
-    
+
     <!-- Hero Canvas Section -->
-    <section class="hero relative w-full h-[86vh] min-h-[640px] overflow-hidden flex flex-col justify-between">
-      
-      <!-- Live Dot-Matrix Canvas Background -->
-      <canvas id="dots" class="absolute inset-0 w-full h-full block pointer-events-none z-0"></canvas>
+  <section class="hero relative w-full h-[86vh] min-h-[640px] overflow-hidden flex flex-col justify-between">
 
-      <!-- Center Copy Block -->
-      <div class="relative z-10 max-w-[760px] w-[92vw] mx-auto text-center pt-[9vh] px-4">
-        
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-[#deded8] bg-white/80 text-xs text-[#555555] mb-6 shadow-sm backdrop-blur-sm">
-          <span class="font-semibold text-sky-600">Meta Global AI Hackathon</span>
-          <span>·</span>
-          <span>Indie Developer Track</span>
-          <span>·</span>
-          <span class="font-mono text-emerald-600 font-medium">100.0% Verified</span>
+    <!-- Live Dot-Matrix Canvas Background -->
+    <canvas id="dots" class="absolute inset-0 w-full h-full block pointer-events-none z-0"></canvas>
+
+    <!-- Center Copy Block -->
+    <div class="relative z-10 max-w-[760px] w-[92vw] mx-auto text-center pt-[9vh] px-4">
+
+      <div
+        class="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-[#deded8] bg-white/80 text-xs text-[#555555] mb-6 shadow-sm backdrop-blur-sm">
+        <span class="font-semibold text-sky-600">Meta Global AI Hackathon</span>
+        <span>·</span>
+        <span>Indie Developer Track</span>
+        <span>·</span>
+        <span class="font-mono text-emerald-600 font-medium"></span>
+      </div>
+
+      <h1 class="text-[38px] sm:text-[54px] md:text-[68px] font-medium leading-[1.04] tracking-[-0.035em]">
+        <span class="block text-[#9a9a9a]">Autonomous Verification.</span>
+        <span class="text-[#111111]">Proving Billing Parity.</span>
+      </h1>
+
+      <p class="mt-5 mx-auto max-w-[440px] text-[#7b7b7b] text-[14px] sm:text-[15.5px] leading-relaxed">
+        Verify that mission-critical legacy billing logic behaves identically in Python — backed by immutable
+        differential evidence, not trust.
+      </p>
+
+      <!-- CTA with Rainbow Underglow -->
+      <div class="cta-wrapper mt-8">
+        <div class="cta-glow"></div>
+        <button onclick="showView('studio')" class="cta-pill text-[14px] font-medium py-3 px-6">
+          <span>Verify Legacy Code</span>
+          <i class="fa-solid fa-bolt text-amber-300 text-xs ml-1"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Partner Logos Row -->
+    <div
+      class="relative z-10 w-full pb-8 px-4 flex flex-wrap justify-center items-center gap-6 sm:gap-10 text-[#8d8d8d] text-xs font-medium tracking-tight">
+
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" />
+        </svg>
+        <span>Muse Spark Open</span>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 1l8 4.5v9L10 19l-8-4.5v-9zM10 6l-4 2.3v4.4L10 15l4-2.3V8.3z" />
+        </svg>
+        <span>Baseten</span>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M1 5q4.5-3 9 0t9 0v3q-4.5 3-9 0t-9 0zm0 7q4.5-3 9 0t9 0v3q-4.5 3-9 0t-9 0z" />
+        </svg>
+        <span>Modal</span>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 1a9 9 0 110 18 9 9 0 010-18zm0 3a6 6 0 100 12 6 6 0 000-12zm0 3a3 3 0 110 6 3 3 0 010-6z" />
+        </svg>
+        <span>Fireworks AI</span>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 1l9 4-9 4-9-4zm-9 8l9 4 9-4v3l-9 4-9-4zm0 5l9 4 9-4v2l-9 4-9-4z" />
+        </svg>
+        <span>Clang (-fwrapv)</span>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- Key Architecture Pillars Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 py-12 border-t border-[#e8e8e3] w-full">
+    <div class="text-center max-w-xl mx-auto mb-10">
+      <h2 class="text-xl font-semibold text-[#111111]">Differential Verification Protocol</h2>
+      <p class="text-sm text-[#777777] mt-1.5">Replacing human review bottlenecks with multi-role agent consensus.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm hover:shadow transition">
+        <div
+          class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-sm mb-4">
+          01
         </div>
-
-        <h1 class="text-[38px] sm:text-[54px] md:text-[68px] font-medium leading-[1.04] tracking-[-0.035em]">
-          <span class="block text-[#9a9a9a]">Autonomous Verification.</span>
-          <span class="text-[#111111]">Proving Billing Parity.</span>
-        </h1>
-
-        <p class="mt-5 mx-auto max-w-[440px] text-[#7b7b7b] text-[14px] sm:text-[15.5px] leading-relaxed">
-          Verify that mission-critical legacy billing logic behaves identically in Python — backed by immutable differential evidence, not trust.
+        <h3 class="text-base font-semibold text-[#111111] mb-2">Immutable Golden Record</h3>
+        <p class="text-sm text-[#666666] leading-relaxed">
+          The legacy C binary is compiled with strict overflow wrapping flags. Hundreds of edge inputs are executed
+          once, SHA-256 hashed, and sealed as the ground-truth standard.
         </p>
-
-        <!-- CTA with Rainbow Underglow -->
-        <div class="cta-wrapper mt-8">
-          <div class="cta-glow"></div>
-          <button onclick="showView('studio')" class="cta-pill text-[14px] font-medium py-3 px-6">
-            <span>Verify Legacy Code</span>
-            <i class="fa-solid fa-bolt text-amber-300 text-xs ml-1"></i>
-          </button>
-        </div>
-
       </div>
 
-      <!-- Partner Logos Row -->
-      <div class="relative z-10 w-full pb-8 px-4 flex flex-wrap justify-center items-center gap-6 sm:gap-10 text-[#8d8d8d] text-xs font-medium tracking-tight">
-        
-        <div class="flex items-center space-x-2">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
-          </svg>
-          <span>Muse Spark Open</span>
+      <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm hover:shadow transition">
+        <div
+          class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm mb-4">
+          02
         </div>
-
-        <div class="flex items-center space-x-2">
-          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 1l8 4.5v9L10 19l-8-4.5v-9zM10 6l-4 2.3v4.4L10 15l4-2.3V8.3z"/>
-          </svg>
-          <span>Baseten</span>
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M1 5q4.5-3 9 0t9 0v3q-4.5 3-9 0t-9 0zm0 7q4.5-3 9 0t9 0v3q-4.5 3-9 0t-9 0z"/>
-          </svg>
-          <span>Modal</span>
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 1a9 9 0 110 18 9 9 0 010-18zm0 3a6 6 0 100 12 6 6 0 000-12zm0 3a3 3 0 110 6 3 3 0 010-6z"/>
-          </svg>
-          <span>Fireworks AI</span>
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 1l9 4-9 4-9-4zm-9 8l9 4 9-4v3l-9 4-9-4zm0 5l9 4 9-4v2l-9 4-9-4z"/>
-          </svg>
-          <span>Clang (-fwrapv)</span>
-        </div>
-
+        <h3 class="text-base font-semibold text-[#111111] mb-2">Monotonic Repair Loop</h3>
+        <p class="text-sm text-[#666666] leading-relaxed">
+          The Debugger agent shrinks failing inputs and proposes taxonomy-guided patches. A patch is rejected if even a
+          single previously matching test regresses.
+        </p>
       </div>
 
-    </section>
-
-    <!-- Key Architecture Pillars Section -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 py-12 border-t border-[#e8e8e3] w-full">
-      <div class="text-center max-w-xl mx-auto mb-10">
-        <h2 class="text-xl font-semibold text-[#111111]">Differential Verification Protocol</h2>
-        <p class="text-sm text-[#777777] mt-1.5">Replacing human review bottlenecks with multi-role agent consensus.</p>
+      <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm hover:shadow transition">
+        <div
+          class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold text-sm mb-4">
+          03
+        </div>
+        <h3 class="text-base font-semibold text-[#111111] mb-2">Adversarial Red-Team</h3>
+        <p class="text-sm text-[#666666] leading-relaxed">
+          A secondary agent inspects both codebases to craft adversarial attacks on truncation division, leap day rules,
+          and rounding ties to stress-test behavioral parity.
+        </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm hover:shadow transition">
-          <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-sm mb-4">
-            01
-          </div>
-          <h3 class="text-base font-semibold text-[#111111] mb-2">Immutable Golden Record</h3>
-          <p class="text-sm text-[#666666] leading-relaxed">
-            The legacy C binary is compiled with strict overflow wrapping flags. Hundreds of edge inputs are executed once, SHA-256 hashed, and sealed as the ground-truth standard.
-          </p>
-        </div>
-
-        <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm hover:shadow transition">
-          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm mb-4">
-            02
-          </div>
-          <h3 class="text-base font-semibold text-[#111111] mb-2">Monotonic Repair Loop</h3>
-          <p class="text-sm text-[#666666] leading-relaxed">
-            The Debugger agent shrinks failing inputs and proposes taxonomy-guided patches. A patch is rejected if even a single previously matching test regresses.
-          </p>
-        </div>
-
-        <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm hover:shadow transition">
-          <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold text-sm mb-4">
-            03
-          </div>
-          <h3 class="text-base font-semibold text-[#111111] mb-2">Adversarial Red-Team</h3>
-          <p class="text-sm text-[#666666] leading-relaxed">
-            A secondary agent inspects both codebases to craft adversarial attacks on truncation division, leap day rules, and rounding ties to stress-test behavioral parity.
-          </p>
-        </div>
-
-      </div>
-    </section>
+    </div>
+  </section>
 
   </main>
 
@@ -324,17 +359,20 @@
   <!-- VIEW 2: VERIFICATION STUDIO (LIVE RUNNER & CODE COMPARATOR)                -->
   <!-- ========================================================================= -->
   <main id="view-studio" class="view-panel hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
-    
+
     <!-- Studio Header & Controls -->
     <div class="bg-white border border-[#e8e8e3] rounded-2xl p-5 sm:p-6 shadow-sm">
       <div class="flex flex-col md:flex-row md:items-end gap-4">
-        
+
         <div class="flex-1 space-y-1.5">
           <div class="flex items-center justify-between">
             <label class="text-xs font-semibold text-[#555555] uppercase tracking-wider">Target Legacy C Module</label>
-            <span id="studioQuirkBadge" class="text-xs font-mono text-sky-700 font-medium bg-sky-50 px-2 py-0.5 rounded border border-sky-200">32-bit signed overflow</span>
+            <span id="studioQuirkBadge"
+              class="text-xs font-mono text-sky-700 font-medium bg-sky-50 px-2 py-0.5 rounded border border-sky-200">32-bit
+              signed overflow</span>
           </div>
-          <select id="studioModuleSelect" onchange="onModuleChange()" class="w-full bg-[#f9f9f7] border border-[#d8d8d2] rounded-xl px-3.5 py-2.5 text-sm text-[#111111] focus:outline-none focus:border-sky-600 font-medium">
+          <select id="studioModuleSelect" onchange="onModuleChange()"
+            class="w-full bg-[#f9f9f7] border border-[#d8d8d2] rounded-xl px-3.5 py-2.5 text-sm text-[#111111] focus:outline-none focus:border-sky-600 font-medium">
             <option value="tiered_pricing.c">tiered_pricing.c (Dev Set · 32-bit integer overflow)</option>
             <option value="invoice_total.c">invoice_total.c (Held-Out · Half-up vs Banker's rounding)</option>
             <option value="proration.c">proration.c (Held-Out · C Truncation vs Python Floor Div)</option>
@@ -344,11 +382,13 @@
 
         <div class="w-full md:w-32 space-y-1.5">
           <label class="text-xs font-semibold text-[#555555] uppercase tracking-wider">Seed</label>
-          <input type="number" id="studioSeed" value="42" class="w-full bg-[#f9f9f7] border border-[#d8d8d2] rounded-xl px-3 py-2.5 text-sm font-mono text-[#111111] focus:outline-none focus:border-sky-600" />
+          <input type="number" id="studioSeed" value="42"
+            class="w-full bg-[#f9f9f7] border border-[#d8d8d2] rounded-xl px-3 py-2.5 text-sm font-mono text-[#111111] focus:outline-none focus:border-sky-600" />
         </div>
 
         <div class="w-full md:w-64">
-          <button id="studioRunBtn" onclick="runStudioVerification()" class="w-full bg-[#111111] hover:bg-black text-white font-medium py-2.5 px-5 rounded-xl text-sm flex items-center justify-center space-x-2 shadow-sm transition active:scale-95">
+          <button id="studioRunBtn" onclick="runStudioVerification()"
+            class="w-full bg-[#111111] hover:bg-black text-white font-medium py-2.5 px-5 rounded-xl text-sm flex items-center justify-center space-x-2 shadow-sm transition active:scale-95">
             <i class="fa-solid fa-bolt text-amber-300"></i>
             <span>Run Autonomous Parity</span>
           </button>
@@ -359,10 +399,14 @@
       <!-- Custom Code Input Drawer -->
       <div id="studioCustomDrawer" class="hidden mt-4 pt-4 border-t border-[#e8e8e3] space-y-2">
         <div class="flex items-center justify-between">
-          <label class="text-xs font-semibold text-[#555555]">Custom Pure C Source Code (no external IO or time dependencies):</label>
-          <button onclick="loadSampleCustomCode()" class="text-xs text-sky-600 hover:underline">Insert Sample Function</button>
+          <label class="text-xs font-semibold text-[#555555]">Custom Pure C Source Code (no external IO or time
+            dependencies):</label>
+          <button onclick="loadSampleCustomCode()" class="text-xs text-sky-600 hover:underline">Insert Sample
+            Function</button>
         </div>
-        <textarea id="studioCustomCode" rows="8" class="w-full bg-[#f9f9f7] border border-[#d8d8d2] rounded-xl p-3 text-xs font-mono text-[#222222] focus:outline-none focus:border-sky-600" placeholder="int compute_fee(int base, int rate) { ... }"></textarea>
+        <textarea id="studioCustomCode" rows="8"
+          class="w-full bg-[#f9f9f7] border border-[#d8d8d2] rounded-xl p-3 text-xs font-mono text-[#222222] focus:outline-none focus:border-sky-600"
+          placeholder="int compute_fee(int base, int rate) { ... }"></textarea>
       </div>
 
     </div>
@@ -375,22 +419,62 @@
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-10 gap-2 text-center" id="studioStepper">
-        <div id="s-step-1" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">01</div><i class="fa-solid fa-scroll text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Archaeologist</div></div>
-        <div id="s-step-2" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">02</div><i class="fa-solid fa-burst text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Fuzzer</div></div>
-        <div id="s-step-3" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">03</div><i class="fa-solid fa-box-archive text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Recorder</div></div>
-        <div id="s-step-4" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">04</div><i class="fa-solid fa-code-compare text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Migrator</div></div>
-        <div id="s-step-5" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">05</div><i class="fa-solid fa-rotate-right text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Replayer</div></div>
-        <div id="s-step-6" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">06</div><i class="fa-solid fa-wrench text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Debugger</div></div>
-        <div id="s-step-7" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">07</div><i class="fa-solid fa-shield-halved text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Held-out</div></div>
-        <div id="s-step-8" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">08</div><i class="fa-solid fa-user-ninja text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Red-Team</div></div>
-        <div id="s-step-9" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">09</div><i class="fa-solid fa-scale-balanced text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Quirks</div></div>
-        <div id="s-step-10" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">10</div><i class="fa-solid fa-file-invoice text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Reporter</div></div>
+        <div id="s-step-1" class="step-card rounded-xl p-2.5">
+          <div class="text-[10px] text-gray-400 font-mono">01</div><i
+            class="fa-solid fa-scroll text-xs my-1 text-gray-500"></i>
+          <div class="text-[11px] font-medium text-gray-700 truncate">Archaeologist</div>
+        </div>
+        <div id="s-step-2" class="step-card rounded-xl p-2.5">
+          <div class="text-[10px] text-gray-400 font-mono">02</div><i
+            class="fa-solid fa-burst text-xs my-1 text-gray-500"></i>
+          <div class="text-[11px] font-medium text-gray-700 truncate">Fuzzer</div>
+        </div>
+        <div id="s-step-3" class="step-card rounded-xl p-2.5">
+          <div class="text-[10px] text-gray-400 font-mono">03</div><i
+            class="fa-solid fa-box-archive text-xs my-1 text-gray-500"></i>
+          <div class="text-[11px] font-medium text-gray-700 truncate">Recorder</div>
+        </div>
+        <div id="s-step-4" class="step-card rounded-xl p-2.5">
+          <div class="text-[10px] text-gray-400 font-mono">04</div><i
+            class="fa-solid fa-code-compare text-xs my-1 text-gray-500"></i>
+          <div class="text-[11px] font-medium text-gray-700 truncate">Migrator</div>
+        </div>
+        <div id="s-step-5" class="step-card rounded-xl p-2.5">
+          <div class="text-[10px] text-gray-400 font-mono">05</div><i
+            class="fa-solid fa-rotate-right text-xs my-1 text-gray-500"></i>
+          <div class="text-[11px] font-medium text-gray-700 truncate">Replayer</div>
+        </div>
+        <div id="s-step-6" class="step-card rounded-xl p-2.5">
+          <div class="text-[10px] text-gray-400 font-mono">06</div><i
+            class="fa-solid fa-wrench text-xs my-1 text-gray-500"></i>
+          <div class="text-[11px] font-medium text-gray-700 truncate">Debugger</div>
+        </div>
+        <div id="s-step-7" class="step-card rounded-xl p-2.5">
+          <div class="text-[10px] text-gray-400 font-mono">07</div><i
+            class="fa-solid fa-shield-halved text-xs my-1 text-gray-500"></i>
+          <div class="text-[11px] font-medium text-gray-700 truncate">Held-out</div>
+        </div>
+        <div id="s-step-8" class="step-card rounded-xl p-2.5">
+          <div class="text-[10px] text-gray-400 font-mono">08</div><i
+            class="fa-solid fa-user-ninja text-xs my-1 text-gray-500"></i>
+          <div class="text-[11px] font-medium text-gray-700 truncate">Red-Team</div>
+        </div>
+        <div id="s-step-9" class="step-card rounded-xl p-2.5">
+          <div class="text-[10px] text-gray-400 font-mono">09</div><i
+            class="fa-solid fa-scale-balanced text-xs my-1 text-gray-500"></i>
+          <div class="text-[11px] font-medium text-gray-700 truncate">Quirks</div>
+        </div>
+        <div id="s-step-10" class="step-card rounded-xl p-2.5">
+          <div class="text-[10px] text-gray-400 font-mono">10</div><i
+            class="fa-solid fa-file-invoice text-xs my-1 text-gray-500"></i>
+          <div class="text-[11px] font-medium text-gray-700 truncate">Reporter</div>
+        </div>
       </div>
     </div>
 
     <!-- Metrics Bar -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      
+
       <div class="bg-white border border-[#e8e8e3] rounded-2xl p-4 shadow-sm">
         <span class="text-xs text-[#777777] font-semibold uppercase">First-Pass BPR</span>
         <div id="m-first" class="text-2xl font-bold text-amber-600 mt-1">83.6%</div>
@@ -419,7 +503,7 @@
 
     <!-- Side-by-side Code Comparator -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      
+
       <div class="bg-white border border-[#e8e8e3] rounded-2xl overflow-hidden flex flex-col shadow-sm">
         <div class="bg-[#f2f2ee] px-4 py-2.5 border-b border-[#e8e8e3] flex items-center justify-between">
           <span class="text-xs font-semibold text-[#333333] flex items-center space-x-2">
@@ -427,11 +511,15 @@
             <span id="cSourceTitle">Legacy C Source</span>
           </span>
           <div class="flex items-center space-x-2">
-            <button onclick="copyCode('cCodePreview')" class="text-xs text-gray-500 hover:text-black" title="Copy C Source"><i class="fa-regular fa-copy"></i></button>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-white text-[#555555] border border-[#e0e0da]">clang -fwrapv</span>
+            <button onclick="copyCode('cCodePreview')" class="text-xs text-gray-500 hover:text-black"
+              title="Copy C Source"><i class="fa-regular fa-copy"></i></button>
+            <span
+              class="text-[11px] font-mono px-2 py-0.5 rounded bg-white text-[#555555] border border-[#e0e0da]">clang
+              -fwrapv</span>
           </div>
         </div>
-        <pre id="cCodePreview" class="p-4 text-xs font-mono text-[#222222] bg-[#fafaf8] overflow-x-auto max-h-[460px] leading-relaxed select-all">/* Loading legacy C code... */</pre>
+        <pre id="cCodePreview"
+          class="p-4 text-xs font-mono text-[#222222] bg-[#fafaf8] overflow-x-auto max-h-[460px] leading-relaxed select-all">/* Loading legacy C code... */</pre>
       </div>
 
       <div class="bg-white border border-[#e8e8e3] rounded-2xl overflow-hidden flex flex-col shadow-sm">
@@ -441,26 +529,34 @@
             <span>Migrated Python 3</span>
           </span>
           <div class="flex items-center space-x-2">
-            <button onclick="copyCode('pyCodePreview')" class="text-xs text-gray-500 hover:text-black" title="Copy Python"><i class="fa-regular fa-copy"></i></button>
-            <span id="pyBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">100.0% Parity Verified</span>
+            <button onclick="copyCode('pyCodePreview')" class="text-xs text-gray-500 hover:text-black"
+              title="Copy Python"><i class="fa-regular fa-copy"></i></button>
+            <span id="pyBadge"
+              class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">100.0%
+              Parity Verified</span>
           </div>
         </div>
-        <pre id="pyCodePreview" class="p-4 text-xs font-mono text-[#222222] bg-[#fafaf8] overflow-x-auto max-h-[460px] leading-relaxed select-all"># Python migration will appear here after verification</pre>
+        <pre id="pyCodePreview"
+          class="p-4 text-xs font-mono text-[#222222] bg-[#fafaf8] overflow-x-auto max-h-[460px] leading-relaxed select-all"># Python migration will appear here after verification</pre>
       </div>
 
     </div>
 
     <!-- Direct Artifact Action Bar -->
-    <div id="studioArtifactActions" class="flex flex-wrap items-center justify-between gap-3 p-4 bg-white border border-[#e8e8e3] rounded-2xl shadow-sm">
+    <div id="studioArtifactActions"
+      class="flex flex-wrap items-center justify-between gap-3 p-4 bg-white border border-[#e8e8e3] rounded-2xl shadow-sm">
       <div class="text-xs text-[#666666]">
-        <strong>Evidence Artifacts:</strong> Inspect the full HTML differential report or export the shareable Parity Score Card.
+        <strong>Evidence Artifacts:</strong> Inspect the full HTML differential report or export the shareable Parity
+        Score Card.
       </div>
       <div class="flex items-center space-x-3">
-        <button onclick="openScorecardModal()" class="px-4 py-2 text-xs font-medium text-[#333333] bg-[#f2f2ee] hover:bg-[#e8e8e3] rounded-xl border border-[#deded8] transition flex items-center space-x-1.5">
+        <button onclick="openScorecardModal()"
+          class="px-4 py-2 text-xs font-medium text-[#333333] bg-[#f2f2ee] hover:bg-[#e8e8e3] rounded-xl border border-[#deded8] transition flex items-center space-x-1.5">
           <i class="fa-solid fa-id-card text-purple-600"></i>
           <span>View Score Card</span>
         </button>
-        <button onclick="openReportModal()" class="px-4 py-2 text-xs font-medium text-white bg-[#111111] hover:bg-black rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+        <button onclick="openReportModal()"
+          class="px-4 py-2 text-xs font-medium text-white bg-[#111111] hover:bg-black rounded-xl transition flex items-center space-x-1.5 shadow-sm">
           <i class="fa-solid fa-arrow-up-right-from-square"></i>
           <span>Inspect Full Report</span>
         </button>
@@ -473,22 +569,27 @@
   <!-- VIEW 3: QUIRKS & CONTRACTS                                                -->
   <!-- ========================================================================= -->
   <main id="view-quirks" class="view-panel hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
-    
+
     <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div>
           <h2 class="text-xl font-semibold text-[#111111]">Planted & Preserved Legacy Quirks</h2>
           <p class="text-sm text-[#666666] leading-relaxed mt-1">
-            Parity replaces "trust me" with an explicit categorization of preserved legacy behavior: differentiating dangerous bugs from intentional policies.
+            Parity replaces "trust me" with an explicit categorization of preserved legacy behavior: differentiating
+            dangerous bugs from intentional policies.
           </p>
         </div>
-        
+
         <!-- Filter Pills -->
         <div class="flex items-center space-x-2 bg-[#f2f2ee] p-1 rounded-xl text-xs font-medium self-start">
-          <button onclick="filterQuirks('all')" id="qf-all" class="q-filter px-3 py-1 rounded-lg bg-white shadow-sm font-semibold text-black">All</button>
-          <button onclick="filterQuirks('likely_bug')" id="qf-likely_bug" class="q-filter px-3 py-1 rounded-lg text-[#666666] hover:text-black">Bugs</button>
-          <button onclick="filterQuirks('likely_intentional')" id="qf-likely_intentional" class="q-filter px-3 py-1 rounded-lg text-[#666666] hover:text-black">Intentional</button>
-          <button onclick="filterQuirks('unclear')" id="qf-unclear" class="q-filter px-3 py-1 rounded-lg text-[#666666] hover:text-black">Unclear</button>
+          <button onclick="filterQuirks('all')" id="qf-all"
+            class="q-filter px-3 py-1 rounded-lg bg-white shadow-sm font-semibold text-black">All</button>
+          <button onclick="filterQuirks('likely_bug')" id="qf-likely_bug"
+            class="q-filter px-3 py-1 rounded-lg text-[#666666] hover:text-black">Bugs</button>
+          <button onclick="filterQuirks('likely_intentional')" id="qf-likely_intentional"
+            class="q-filter px-3 py-1 rounded-lg text-[#666666] hover:text-black">Intentional</button>
+          <button onclick="filterQuirks('unclear')" id="qf-unclear"
+            class="q-filter px-3 py-1 rounded-lg text-[#666666] hover:text-black">Unclear</button>
         </div>
       </div>
 
@@ -498,21 +599,24 @@
             <i class="fa-solid fa-triangle-exclamation"></i>
             <span>Likely Bug</span>
           </div>
-          <p class="text-xs text-[#555555] leading-relaxed">Preserved legacy behavior that appears unintentional or dangerous in production (e.g. 32-bit overflow turning invoices negative).</p>
+          <p class="text-xs text-[#555555] leading-relaxed">Preserved legacy behavior that appears unintentional or
+            dangerous in production (e.g. 32-bit overflow turning invoices negative).</p>
         </div>
         <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50">
           <div class="flex items-center space-x-2 text-emerald-700 font-semibold text-xs uppercase mb-1">
             <i class="fa-solid fa-check"></i>
             <span>Likely Intentional</span>
           </div>
-          <p class="text-xs text-[#555555] leading-relaxed">Preserved behavior that represents documented business rules (e.g. integer division truncating in customer's favor).</p>
+          <p class="text-xs text-[#555555] leading-relaxed">Preserved behavior that represents documented business rules
+            (e.g. integer division truncating in customer's favor).</p>
         </div>
         <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/50">
           <div class="flex items-center space-x-2 text-amber-700 font-semibold text-xs uppercase mb-1">
             <i class="fa-solid fa-circle-question"></i>
             <span>Unclear / Review Needed</span>
           </div>
-          <p class="text-xs text-[#555555] leading-relaxed">Discrepancies requiring domain expert or compliance team determination (e.g. commercial half-up vs banker's rounding).</p>
+          <p class="text-xs text-[#555555] leading-relaxed">Discrepancies requiring domain expert or compliance team
+            determination (e.g. commercial half-up vs banker's rounding).</p>
         </div>
       </div>
 
@@ -529,20 +633,27 @@
           </thead>
           <tbody id="quirksTableBody" class="divide-y divide-[#e8e8e3] text-xs">
             <tr class="hover:bg-[#fbfbf9] quirk-row q-likely_bug">
-              <td class="p-3.5 font-medium text-[#111111]">32-bit signed integer overflow wraps large totals to negative values</td>
-              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-red-100 text-red-700 font-mono font-semibold">likely_bug</span></td>
+              <td class="p-3.5 font-medium text-[#111111]">32-bit signed integer overflow wraps large totals to negative
+                values</td>
+              <td class="p-3.5"><span
+                  class="px-2 py-0.5 rounded bg-red-100 text-red-700 font-mono font-semibold">likely_bug</span></td>
               <td class="p-3.5 font-mono text-[#555555]">calculate_tier_price(2147483647, 2) → -2</td>
               <td class="p-3.5 text-[#555555]">Flag for human review. Upgrade to 64-bit int.</td>
             </tr>
             <tr class="hover:bg-[#fbfbf9] quirk-row q-likely_intentional">
-              <td class="p-3.5 font-medium text-[#111111]">Integer division truncates toward zero on negative amounts</td>
-              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 font-mono font-semibold">likely_intentional</span></td>
+              <td class="p-3.5 font-medium text-[#111111]">Integer division truncates toward zero on negative amounts
+              </td>
+              <td class="p-3.5"><span
+                  class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 font-mono font-semibold">likely_intentional</span>
+              </td>
               <td class="p-3.5 font-mono text-[#555555]">apply_discount(-500, 1000) → -450</td>
               <td class="p-3.5 text-[#555555]">Preserve. Document truncation policy.</td>
             </tr>
             <tr class="hover:bg-[#fbfbf9] quirk-row q-unclear">
-              <td class="p-3.5 font-medium text-[#111111]">Commercial half-up tax rounding via (amount * rate + 5000) / 10000</td>
-              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-amber-100 text-amber-700 font-mono font-semibold">unclear</span></td>
+              <td class="p-3.5 font-medium text-[#111111]">Commercial half-up tax rounding via (amount * rate + 5000) /
+                10000</td>
+              <td class="p-3.5"><span
+                  class="px-2 py-0.5 rounded bg-amber-100 text-amber-700 font-mono font-semibold">unclear</span></td>
               <td class="p-3.5 font-mono text-[#555555]">compute_tax(5, 5000) → 1 (Banker's yields 0)</td>
               <td class="p-3.5 text-[#555555]">Preserve and flag for tax compliance review.</td>
             </tr>
@@ -560,16 +671,20 @@
       </div>
       <div id="contractBox" class="space-y-2.5">
         <div class="p-3 rounded-xl bg-[#fafaf8] border border-[#e8e8e3] text-xs font-mono text-[#333333]">
-          RULE 1: Prices are computed in cents as 32-bit signed integers. Overflow wraps. Evidence: calculate_tier_price(2147483647, 2) → -2.
+          RULE 1: Prices are computed in cents as 32-bit signed integers. Overflow wraps. Evidence:
+          calculate_tier_price(2147483647, 2) → -2.
         </div>
         <div class="p-3 rounded-xl bg-[#fafaf8] border border-[#e8e8e3] text-xs font-mono text-[#333333]">
-          RULE 2: Discounts use integer division truncating toward zero. Evidence: apply_discount(-500, 1000) → -450 (not -451).
+          RULE 2: Discounts use integer division truncating toward zero. Evidence: apply_discount(-500, 1000) → -450
+          (not -451).
         </div>
         <div class="p-3 rounded-xl bg-[#fafaf8] border border-[#e8e8e3] text-xs font-mono text-[#333333]">
-          RULE 3: Tax is rounded half-up using (amount * rate + 5000) / 10000. Evidence: compute_tax(5, 5000) → 1 (not 0 as banker's rounding would give).
+          RULE 3: Tax is rounded half-up using (amount * rate + 5000) / 10000. Evidence: compute_tax(5, 5000) → 1 (not 0
+          as banker's rounding would give).
         </div>
         <div class="p-3 rounded-xl bg-[#fafaf8] border border-[#e8e8e3] text-xs font-mono text-[#333333]">
-          RULE 4: Proration uses integer division of (monthly * days_used) / total_days, truncating toward zero. Evidence: prorate_charge(-1000, 1, 15, 2024, 6) → -500.
+          RULE 4: Proration uses integer division of (monthly * days_used) / total_days, truncating toward zero.
+          Evidence: prorate_charge(-1000, 1, 15, 2024, 6) → -500.
         </div>
       </div>
 
@@ -581,14 +696,15 @@
   <!-- VIEW 4: BENCHMARK MATRIX                                                  -->
   <!-- ========================================================================= -->
   <main id="view-benchmarks" class="view-panel hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
-    
+
     <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h2 class="text-xl font-semibold text-[#111111]">Parity Benchmark Evaluation Matrix</h2>
           <p class="text-sm text-[#666666]">Differential testing preservation metrics across all sample modules.</p>
         </div>
-        <button id="btnEvaluateAll" onclick="runEvaluateAll()" class="px-4 py-2.5 text-xs font-medium text-white bg-[#111111] hover:bg-black rounded-xl transition flex items-center space-x-2 shadow-sm self-start sm:self-auto">
+        <button id="btnEvaluateAll" onclick="runEvaluateAll()"
+          class="px-4 py-2.5 text-xs font-medium text-white bg-[#111111] hover:bg-black rounded-xl transition flex items-center space-x-2 shadow-sm self-start sm:self-auto">
           <i class="fa-solid fa-play text-amber-300"></i>
           <span>Run All Benchmarks</span>
         </button>
@@ -612,33 +728,39 @@
           <tbody id="benchmarkRows" class="divide-y divide-[#e8e8e3] text-xs">
             <tr class="hover:bg-[#fbfbf9]">
               <td class="p-3.5 font-semibold text-[#111111]">tiered_pricing.c</td>
-              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono">Development</span></td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono">Development</span>
+              </td>
               <td class="p-3.5 font-mono">835</td>
               <td class="p-3.5 text-amber-600 font-semibold font-mono">83.6%</td>
               <td class="p-3.5 text-emerald-600 font-bold font-mono">100.0%</td>
               <td class="p-3.5 text-sky-600 font-semibold font-mono">99.9%</td>
               <td class="p-3.5 font-mono">0</td>
-              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Verified</span></td>
+              <td class="p-3.5"><span
+                  class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Verified</span></td>
             </tr>
             <tr class="hover:bg-[#fbfbf9]">
               <td class="p-3.5 font-semibold text-[#111111]">invoice_total.c</td>
-              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-mono">Held-Out</span></td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-mono">Held-Out</span>
+              </td>
               <td class="p-3.5 font-mono">565</td>
               <td class="p-3.5 text-amber-600 font-semibold font-mono">60.7%</td>
               <td class="p-3.5 text-emerald-600 font-bold font-mono">100.0%</td>
               <td class="p-3.5 text-sky-600 font-semibold font-mono">100.0%</td>
               <td class="p-3.5 font-mono">0</td>
-              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Verified</span></td>
+              <td class="p-3.5"><span
+                  class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Verified</span></td>
             </tr>
             <tr class="hover:bg-[#fbfbf9]">
               <td class="p-3.5 font-semibold text-[#111111]">proration.c</td>
-              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-mono">Held-Out</span></td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-mono">Held-Out</span>
+              </td>
               <td class="p-3.5 font-mono">562</td>
               <td class="p-3.5 text-amber-600 font-semibold font-mono">31.1%</td>
               <td class="p-3.5 text-emerald-600 font-bold font-mono">100.0%</td>
               <td class="p-3.5 text-sky-600 font-semibold font-mono">100.0%</td>
               <td class="p-3.5 font-mono">0</td>
-              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Verified</span></td>
+              <td class="p-3.5"><span
+                  class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Verified</span></td>
             </tr>
           </tbody>
         </table>
@@ -647,10 +769,18 @@
       <!-- Closed Taxonomy Breakdown -->
       <h3 class="text-base font-semibold text-[#111111] mb-3">Closed Taxonomy of Migration Mismatches</h3>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-        <div class="p-3 rounded-xl border border-[#e8e8e3] bg-[#fafaf8]"><span class="font-semibold block text-[#111111]">rounding</span><span class="text-[#777777]">Half-up vs banker's ties</span></div>
-        <div class="p-3 rounded-xl border border-[#e8e8e3] bg-[#fafaf8]"><span class="font-semibold block text-[#111111]">integer_overflow</span><span class="text-[#777777]">32-bit signed wrapping</span></div>
-        <div class="p-3 rounded-xl border border-[#e8e8e3] bg-[#fafaf8]"><span class="font-semibold block text-[#111111]">integer_division</span><span class="text-[#777777]">C truncation vs Python //</span></div>
-        <div class="p-3 rounded-xl border border-[#e8e8e3] bg-[#fafaf8]"><span class="font-semibold block text-[#111111]">date_calendar</span><span class="text-[#777777]">Month length & leap years</span></div>
+        <div class="p-3 rounded-xl border border-[#e8e8e3] bg-[#fafaf8]"><span
+            class="font-semibold block text-[#111111]">rounding</span><span class="text-[#777777]">Half-up vs banker's
+            ties</span></div>
+        <div class="p-3 rounded-xl border border-[#e8e8e3] bg-[#fafaf8]"><span
+            class="font-semibold block text-[#111111]">integer_overflow</span><span class="text-[#777777]">32-bit signed
+            wrapping</span></div>
+        <div class="p-3 rounded-xl border border-[#e8e8e3] bg-[#fafaf8]"><span
+            class="font-semibold block text-[#111111]">integer_division</span><span class="text-[#777777]">C truncation
+            vs Python //</span></div>
+        <div class="p-3 rounded-xl border border-[#e8e8e3] bg-[#fafaf8]"><span
+            class="font-semibold block text-[#111111]">date_calendar</span><span class="text-[#777777]">Month length &
+            leap years</span></div>
       </div>
 
     </div>
@@ -661,14 +791,15 @@
   <!-- VIEW 5: RUNS & EVIDENCE                                                   -->
   <!-- ========================================================================= -->
   <main id="view-runs" class="view-panel hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
-    
+
     <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm">
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-xl font-semibold text-[#111111]">Historical Verification Runs</h2>
           <p class="text-sm text-[#666666]">Immutable audit trails, SHA-256 golden logs, and shareable reports.</p>
         </div>
-        <button onclick="fetchRunsList()" class="px-3 py-1.5 text-xs text-[#555555] bg-[#f2f2ee] hover:bg-[#e8e8e3] rounded-lg transition">
+        <button onclick="fetchRunsList()"
+          class="px-3 py-1.5 text-xs text-[#555555] bg-[#f2f2ee] hover:bg-[#e8e8e3] rounded-lg transition">
           <i class="fa-solid fa-arrows-rotate mr-1"></i>Refresh
         </button>
       </div>
@@ -701,11 +832,13 @@
   <!-- IN-APP MODAL VIEWER FOR REPORTS & SCORE CARDS                             -->
   <!-- ========================================================================= -->
   <div id="artifactModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-5xl w-full h-[85vh] flex flex-col shadow-2xl border border-[#deded8] overflow-hidden">
+    <div
+      class="bg-white rounded-2xl max-w-5xl w-full h-[85vh] flex flex-col shadow-2xl border border-[#deded8] overflow-hidden">
       <!-- Modal Header -->
       <div class="px-6 py-4 border-b border-[#e8e8e3] flex items-center justify-between bg-[#fbfbf9]">
         <div class="flex items-center space-x-3">
-          <div id="modalIconContainer" class="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-xs">
+          <div id="modalIconContainer"
+            class="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-xs">
             <i class="fa-solid fa-file-invoice"></i>
           </div>
           <div>
@@ -714,11 +847,13 @@
           </div>
         </div>
         <div class="flex items-center space-x-3">
-          <a id="modalExternalLink" target="_blank" href="#" class="px-3 py-1.5 text-xs text-[#444444] bg-[#f2f2ee] hover:bg-[#e8e8e3] rounded-lg transition flex items-center space-x-1.5">
+          <a id="modalExternalLink" target="_blank" href="#"
+            class="px-3 py-1.5 text-xs text-[#444444] bg-[#f2f2ee] hover:bg-[#e8e8e3] rounded-lg transition flex items-center space-x-1.5">
             <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
             <span>Open in Tab</span>
           </a>
-          <button onclick="closeArtifactModal()" class="w-8 h-8 rounded-lg text-gray-400 hover:text-black hover:bg-gray-100 flex items-center justify-center transition">
+          <button onclick="closeArtifactModal()"
+            class="w-8 h-8 rounded-lg text-gray-400 hover:text-black hover:bg-gray-100 flex items-center justify-center transition">
             <i class="fa-solid fa-xmark text-sm"></i>
           </button>
         </div>
@@ -733,7 +868,7 @@
   <!-- FOOTER -->
   <footer class="w-full border-t border-[#e8e8e3] bg-[#f7f7f5] text-[#777777] text-xs py-5 px-4 text-center mt-auto">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-      <span>Built with <strong>Muse Spark Open</strong> (Meta Open Weights) · Meta Global AI Hackathon</span>
+      <span>Built for Meta Global AI Hackathon</span>
       <span>Indie Developer Track · Push the Frontier (Software)</span>
     </div>
   </footer>
@@ -1451,4 +1586,5 @@ int compute_volume_discount(int price_cents, int quantity) {
     requestAnimationFrame(loop);
   </script>
 </body>
+
 </html>

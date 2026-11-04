@@ -7,4 +7,3 @@ Instructions:
 3. Translate pointer-based arrays to Python lists.
 4. Maintain deterministic pure-function semantics: no I/O, no network, no clock, no random state.
 5. Return clean, valid Python code accompanied by initial migration notes.
-

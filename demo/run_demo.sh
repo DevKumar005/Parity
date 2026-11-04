@@ -37,4 +37,3 @@ echo "✔ Demo run complete!"
 echo "  - Check runs/ for latest artifacts, golden files, and HTML reports"
 echo "  - Start the interactive dashboard anytime with: parity serve"
 echo "============================================================"
-

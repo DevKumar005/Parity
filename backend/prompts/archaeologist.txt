@@ -11,4 +11,3 @@ Instructions:
    - Half-up commercial rounding vs banker's (round-to-even) rounding
    - Calendar date arithmetic, leap year rules, and month-end boundary days
 4. Return a structured JSON object with function signatures and detailed probe notes.
-

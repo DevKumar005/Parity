@@ -79,4 +79,3 @@ def held_out_check(
     )
 
     return match_rate, matches, total
-

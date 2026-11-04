@@ -69,4 +69,3 @@ def sample_mismatches() -> list[Mismatch]:
             diagnosis=DiagnosisCategory.INTEGER_DIVISION,
         ),
     ]
-

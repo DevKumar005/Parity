@@ -15,4 +15,3 @@ Repair Rules:
 1. Monotonic Repair Rule: The patch must fix mismatches without causing a single regression on previously passing inputs.
 2. Anti-Hardcoding Rule: Never inject hardcoded literal return values for specific test inputs.
 3. Provide complete, valid, self-contained Python code in the 'patched_code' field.
-

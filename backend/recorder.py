@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import shutil
 import subprocess
 import textwrap
 import time
@@ -153,10 +155,11 @@ def _c_str_escape(s: str) -> str:
 
 
 def _compile_driver(driver_path: Path, run_dir: Path) -> Path:
-    """Compile the C driver with clang."""
+    """Compile the C driver with clang or gcc."""
     binary_path = run_dir / "driver"
+    compiler = os.environ.get("CC") or shutil.which("clang") or shutil.which("gcc") or shutil.which("cc") or "clang"
     cmd = [
-        "clang",
+        compiler,
         "-fwrapv",                     # defined signed integer overflow
         "-o", str(binary_path),
         str(driver_path),

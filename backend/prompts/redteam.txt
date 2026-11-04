@@ -9,4 +9,3 @@ Instructions:
    - Rounding tiebreaks on negative tax values
    - Century leap years (e.g. 1900, 2000, 2100)
 3. Return harsh adversarial inputs in structured JSON format.
-

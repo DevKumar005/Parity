@@ -29,12 +29,12 @@ app = typer.Typer(
 )
 
 BANNER = r"""[bold cyan]
-  ____             _ _         
- |  _ \ __ _ _ __ (_) |_ _   _ 
+  ____             _ _
+ |  _ \ __ _ _ __ (_) |_ _   _
  | |_) / _` | '__|| | __| | | |
  |  __/ (_| | |   | | |_| |_| |
  |_|   \__,_|_|   |_|\__|\__, |
-                         |___/ 
+                         |___/
 [/bold cyan][dim]Autonomous Billing Migration & Behavioral Equivalence Verification[/dim]
 [dim]Powered by Muse Spark Open (Meta Open Weights)[/dim]
 """
@@ -219,4 +219,3 @@ def serve_command(
 
 if __name__ == "__main__":
     app()
-

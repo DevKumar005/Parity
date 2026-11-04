@@ -10,4 +10,3 @@ services:
         value: mock
       - key: BASETEN_MODEL_ID
         value: muse-spark-open-1026
-

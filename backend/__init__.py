@@ -172,4 +172,3 @@ class PipelineResult:
     legacy_code: str = ""
     run_dir: Path | None = None
     seeds: dict[str, int] = field(default_factory=dict)
-

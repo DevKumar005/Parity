@@ -74,4 +74,3 @@ def test_candidate_test_pass_and_fail(tmp_path: Path):
     assert rate == 1.0
     assert len(mismatches) == 0
     assert len(passing) == 2
-

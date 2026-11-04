@@ -53,4 +53,3 @@ def test_usage_ledger_recording():
     entry = client.ledger[-1]
     assert entry.role == AgentRole.ARCHAEOLOGIST.value
     assert entry.purpose == "test call"
-

@@ -257,4 +257,3 @@ def get_run_scorecard(run_id: str):
 # Mount frontend static directory if exists
 if FRONTEND_DIR.exists():
     app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
-
