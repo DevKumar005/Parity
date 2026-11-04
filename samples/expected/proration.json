@@ -1,0 +1,5 @@
+{
+  "planted_quirks": ["C integer division truncates toward zero; Python // floors toward negative infinity; differs on negative dividends"],
+  "functions": ["days_in_month", "prorate_charge"],
+  "set": "held-out"
+}

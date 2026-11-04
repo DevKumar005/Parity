@@ -1,0 +1,55 @@
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# Testing and verification caches
+.pytest_cache/
+.hypothesis/
+.coverage
+htmlcov/
+
+# C / Clang compilation artifacts
+*.o
+*.obj
+*.out
+*.dylib
+*.a
+*.exe
+*.dSYM/
+
+# Run logs and generated execution artifacts
+runs/
+*.log
+
+# OS & Editor files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~

@@ -1,0 +1,5 @@
+{
+  "planted_quirks": ["Half-up rounding via (amount * rate + 5000) / 10000 differs from Python round() banker's rounding on exact halves"],
+  "functions": ["compute_tax", "invoice_total"],
+  "set": "held-out"
+}

@@ -1,0 +1,27 @@
+[project]
+name = "parity"
+version = "0.1.0"
+description = "Verify that migrated billing code behaves exactly like the legacy original. Built with Muse Spark Open."
+requires-python = ">=3.12"
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "pydantic>=2.0.0",
+    "jinja2>=3.1.0",
+    "hypothesis>=6.0.0",
+    "httpx>=0.27.0",
+]
+
+[project.scripts]
+parity = "backend.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend"]
+

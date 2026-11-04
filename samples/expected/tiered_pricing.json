@@ -1,0 +1,5 @@
+{
+  "planted_quirks": ["32-bit signed integer overflow wraps to negative on large quantity * price"],
+  "functions": ["calculate_tier_price", "apply_discount", "total_with_tiers"],
+  "set": "development"
+}

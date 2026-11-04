@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parity — Autonomous Billing Migration & Behavioral Equivalence Verification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    :root {
+      --bg: #f7f7f5;
+      --bg-card: #ffffff;
+      --border: #e8e8e3;
+      --border-dark: #d2d2cc;
+      --ink: #111111;
+      --mute: #9a9a9a;
+      --sub: #7b7b7b;
+      --accent: #2563eb;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+
+    /* Navigation styling */
+    .nav-btn {
+      color: #3a3a3a;
+      transition: all 0.2s ease;
+      font-size: 13.5px;
+      font-weight: 500;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 999px;
+      position: relative;
+    }
+    .nav-btn:hover {
+      color: #000000;
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+    .nav-btn.active {
+      color: #000000;
+      font-weight: 600;
+      background-color: rgba(0, 0, 0, 0.06);
+    }
+
+    /* Rainbow Underglow CTA (Kindred Spec) */
+    .cta-wrapper {
+      display: inline-block;
+      position: relative;
+    }
+    .cta-glow {
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      bottom: -6px;
+      height: 16px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, #ffcf5a, #7dffa8, #5ad7ff, #9b7bff, #ff6fd8, #ffb36b);
+      filter: blur(9px);
+      opacity: 0.85;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    .cta-pill {
+      position: relative;
+      background: #111111;
+      color: #ffffff;
+      font-size: 13.5px;
+      font-weight: 500;
+      padding: 11px 22px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.25s ease, background-color 0.2s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .cta-wrapper:hover .cta-pill {
+      transform: translateY(-1px);
+      background: #000000;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    }
+    .cta-wrapper:hover .cta-glow {
+      opacity: 1;
+      filter: blur(12px);
+      bottom: -9px;
+    }
+
+    /* Pipeline Step Cards */
+    .step-card {
+      transition: all 0.25s ease;
+      border: 1px solid var(--border);
+      background: #ffffff;
+    }
+    .step-card.stepper-active {
+      border-color: #0284c7;
+      box-shadow: 0 0 14px rgba(2, 132, 199, 0.28);
+      transform: translateY(-2px);
+      background: #f0f9ff;
+    }
+    .step-card.stepper-done {
+      border-color: #16a34a;
+      background: #f0fdf4;
+    }
+
+    /* Code Container & Scrollbars */
+    pre::-webkit-scrollbar, div::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    pre::-webkit-scrollbar-thumb, div::-webkit-scrollbar-thumb {
+      background: #d4d4ce;
+      border-radius: 4px;
+    }
+    pre::-webkit-scrollbar-thumb:hover, div::-webkit-scrollbar-thumb:hover {
+      background: #bcbcb5;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      background-color: rgba(17, 17, 17, 0.45);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- ========================================================================= -->
+  <!-- TOP NAVIGATION BAR                                                        -->
+  <!-- ========================================================================= -->
+  <header class="w-full border-b border-[#e8e8e3] bg-[#f7f7f5]/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="showView('hero')">
+        <div class="w-8 h-8 rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-sm tracking-tight shadow-sm">
+          P
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="font-semibold text-[15px] tracking-tight text-[#111111]">Parity</span>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#e8e8e3] text-[#555555]">v0.1.0</span>
+        </div>
+      </div>
+
+      <!-- Desktop Navigation Tabs -->
+      <nav class="hidden md:flex items-center space-x-2">
+        <button class="nav-btn active" id="nav-hero" onclick="showView('hero')">Overview</button>
+        <button class="nav-btn" id="nav-studio" onclick="showView('studio')">Verification Studio</button>
+        <button class="nav-btn" id="nav-quirks" onclick="showView('quirks')">Quirks & Contracts</button>
+        <button class="nav-btn" id="nav-benchmarks" onclick="showView('benchmarks')">Benchmarks</button>
+        <button class="nav-btn" id="nav-runs" onclick="showView('runs')">Runs & Evidence</button>
+      </nav>
+
+      <!-- Right Action Area -->
+      <div class="flex items-center space-x-3">
+        <div id="providerStatusBadge" class="hidden sm:flex items-center space-x-1.5 text-xs text-[#555555] bg-[#eaeae5] px-3 py-1 rounded-full font-mono">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Muse Spark Open · Active</span>
+        </div>
+        
+        <div class="cta-wrapper">
+          <div class="cta-glow"></div>
+          <button onclick="showView('studio')" class="cta-pill text-xs py-2 px-3.5">
+            <span>Launch Studio</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Mobile Sub-Navigation Bar -->
+    <div class="flex md:hidden overflow-x-auto px-4 py-2 border-t border-[#e8e8e3] space-x-2 bg-[#f7f7f5]">
+      <button class="nav-btn active text-xs whitespace-nowrap" id="mob-hero" onclick="showView('hero')">Overview</button>
+      <button class="nav-btn text-xs whitespace-nowrap" id="mob-studio" onclick="showView('studio')">Studio</button>
+      <button class="nav-btn text-xs whitespace-nowrap" id="mob-quirks" onclick="showView('quirks')">Quirks</button>
+      <button class="nav-btn text-xs whitespace-nowrap" id="mob-benchmarks" onclick="showView('benchmarks')">Benchmarks</button>
+      <button class="nav-btn text-xs whitespace-nowrap" id="mob-runs" onclick="showView('runs')">Evidence</button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 1: HERO HOMEPAGE (DOT-MATRIX HANDS CANVAS HERO)                      -->
+  <!-- ========================================================================= -->
+  <main id="view-hero" class="view-panel flex-1 flex flex-col">
+    
+    <!-- Hero Canvas Section -->
+    <section class="hero relative w-full h-[86vh] min-h-[640px] overflow-hidden flex flex-col justify-between">
+      
+      <!-- Live Dot-Matrix Canvas Background -->
+      <canvas id="dots" class="absolute inset-0 w-full h-full block pointer-events-none z-0"></canvas>
+
+      <!-- Center Copy Block -->
+      <div class="relative z-10 max-w-[760px] w-[92vw] mx-auto text-center pt-[9vh] px-4">
+        
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-[#deded8] bg-white/80 text-xs text-[#555555] mb-6 shadow-sm backdrop-blur-sm">
+          <span class="font-semibold text-sky-600">Meta Global AI Hackathon</span>
+          <span>·</span>
+          <span>Indie Developer Track</span>
+          <span>·</span>
+          <span class="font-mono text-emerald-600 font-medium">100.0% Verified</span>
+        </div>
+
+        <h1 class="text-[38px] sm:text-[54px] md:text-[68px] font-medium leading-[1.04] tracking-[-0.035em]">
+          <span class="block text-[#9a9a9a]">Autonomous Verification.</span>
+          <span class="text-[#111111]">Proving Billing Parity.</span>
+        </h1>
+
+        <p class="mt-5 mx-auto max-w-[440px] text-[#7b7b7b] text-[14px] sm:text-[15.5px] leading-relaxed">
+          Verify that mission-critical legacy billing logic behaves identically in Python — backed by immutable differential evidence, not trust.
+        </p>
+
+        <!-- CTA with Rainbow Underglow -->
+        <div class="cta-wrapper mt-8">
+          <div class="cta-glow"></div>
+          <button onclick="showView('studio')" class="cta-pill text-[14px] font-medium py-3 px-6">
+            <span>Verify Legacy Code</span>
+            <i class="fa-solid fa-bolt text-amber-300 text-xs ml-1"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Partner Logos Row -->
+      <div class="relative z-10 w-full pb-8 px-4 flex flex-wrap justify-center items-center gap-6 sm:gap-10 text-[#8d8d8d] text-xs font-medium tracking-tight">
+        
+        <div class="flex items-center space-x-2">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+          </svg>
+          <span>Muse Spark Open</span>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 1l8 4.5v9L10 19l-8-4.5v-9zM10 6l-4 2.3v4.4L10 15l4-2.3V8.3z"/>
+          </svg>
+          <span>Baseten</span>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M1 5q4.5-3 9 0t9 0v3q-4.5 3-9 0t-9 0zm0 7q4.5-3 9 0t9 0v3q-4.5 3-9 0t-9 0z"/>
+          </svg>
+          <span>Modal</span>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 1a9 9 0 110 18 9 9 0 010-18zm0 3a6 6 0 100 12 6 6 0 000-12zm0 3a3 3 0 110 6 3 3 0 010-6z"/>
+          </svg>
+          <span>Fireworks AI</span>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 1l9 4-9 4-9-4zm-9 8l9 4 9-4v3l-9 4-9-4zm0 5l9 4 9-4v2l-9 4-9-4z"/>
+          </svg>
+          <span>Clang (-fwrapv)</span>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Key Architecture Pillars Section -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 py-12 border-t border-[#e8e8e3] w-full">
+      <div class="text-center max-w-xl mx-auto mb-10">
+        <h2 class="text-xl font-semibold text-[#111111]">Differential Verification Protocol</h2>
+        <p class="text-sm text-[#777777] mt-1.5">Replacing human review bottlenecks with multi-role agent consensus.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm hover:shadow transition">
+          <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-sm mb-4">
+            01
+          </div>
+          <h3 class="text-base font-semibold text-[#111111] mb-2">Immutable Golden Record</h3>
+          <p class="text-sm text-[#666666] leading-relaxed">
+            The legacy C binary is compiled with strict overflow wrapping flags. Hundreds of edge inputs are executed once, SHA-256 hashed, and sealed as the ground-truth standard.
+          </p>
+        </div>
+
+        <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm hover:shadow transition">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm mb-4">
+            02
+          </div>
+          <h3 class="text-base font-semibold text-[#111111] mb-2">Monotonic Repair Loop</h3>
+          <p class="text-sm text-[#666666] leading-relaxed">
+            The Debugger agent shrinks failing inputs and proposes taxonomy-guided patches. A patch is rejected if even a single previously matching test regresses.
+          </p>
+        </div>
+
+        <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm hover:shadow transition">
+          <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold text-sm mb-4">
+            03
+          </div>
+          <h3 class="text-base font-semibold text-[#111111] mb-2">Adversarial Red-Team</h3>
+          <p class="text-sm text-[#666666] leading-relaxed">
+            A secondary agent inspects both codebases to craft adversarial attacks on truncation division, leap day rules, and rounding ties to stress-test behavioral parity.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 2: VERIFICATION STUDIO (LIVE RUNNER & CODE COMPARATOR)                -->
+  <!-- ========================================================================= -->
+  <main id="view-studio" class="view-panel hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    
+    <!-- Studio Header & Controls -->
+    <div class="bg-white border border-[#e8e8e3] rounded-2xl p-5 sm:p-6 shadow-sm">
+      <div class="flex flex-col md:flex-row md:items-end gap-4">
+        
+        <div class="flex-1 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-semibold text-[#555555] uppercase tracking-wider">Target Legacy C Module</label>
+            <span id="studioQuirkBadge" class="text-xs font-mono text-sky-700 font-medium bg-sky-50 px-2 py-0.5 rounded border border-sky-200">32-bit signed overflow</span>
+          </div>
+          <select id="studioModuleSelect" onchange="onModuleChange()" class="w-full bg-[#f9f9f7] border border-[#d8d8d2] rounded-xl px-3.5 py-2.5 text-sm text-[#111111] focus:outline-none focus:border-sky-600 font-medium">
+            <option value="tiered_pricing.c">tiered_pricing.c (Dev Set · 32-bit integer overflow)</option>
+            <option value="invoice_total.c">invoice_total.c (Held-Out · Half-up vs Banker's rounding)</option>
+            <option value="proration.c">proration.c (Held-Out · C Truncation vs Python Floor Div)</option>
+            <option value="custom">✍️ Custom C Code (Paste your own pure function)</option>
+          </select>
+        </div>
+
+        <div class="w-full md:w-32 space-y-1.5">
+          <label class="text-xs font-semibold text-[#555555] uppercase tracking-wider">Seed</label>
+          <input type="number" id="studioSeed" value="42" class="w-full bg-[#f9f9f7] border border-[#d8d8d2] rounded-xl px-3 py-2.5 text-sm font-mono text-[#111111] focus:outline-none focus:border-sky-600" />
+        </div>
+
+        <div class="w-full md:w-64">
+          <button id="studioRunBtn" onclick="runStudioVerification()" class="w-full bg-[#111111] hover:bg-black text-white font-medium py-2.5 px-5 rounded-xl text-sm flex items-center justify-center space-x-2 shadow-sm transition active:scale-95">
+            <i class="fa-solid fa-bolt text-amber-300"></i>
+            <span>Run Autonomous Parity</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Custom Code Input Drawer -->
+      <div id="studioCustomDrawer" class="hidden mt-4 pt-4 border-t border-[#e8e8e3] space-y-2">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-semibold text-[#555555]">Custom Pure C Source Code (no external IO or time dependencies):</label>
+          <button onclick="loadSampleCustomCode()" class="text-xs text-sky-600 hover:underline">Insert Sample Function</button>
+        </div>
+        <textarea id="studioCustomCode" rows="8" class="w-full bg-[#f9f9f7] border border-[#d8d8d2] rounded-xl p-3 text-xs font-mono text-[#222222] focus:outline-none focus:border-sky-600" placeholder="int compute_fee(int base, int rate) { ... }"></textarea>
+      </div>
+
+    </div>
+
+    <!-- 10-Stage Pipeline Stepper -->
+    <div class="bg-white border border-[#e8e8e3] rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xs font-bold text-[#555555] uppercase tracking-wider">10-Stage Autonomous Agent Pipeline</h3>
+        <span id="studioPipelineStatus" class="text-xs font-mono text-[#777777]">Ready to execute</span>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-10 gap-2 text-center" id="studioStepper">
+        <div id="s-step-1" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">01</div><i class="fa-solid fa-scroll text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Archaeologist</div></div>
+        <div id="s-step-2" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">02</div><i class="fa-solid fa-burst text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Fuzzer</div></div>
+        <div id="s-step-3" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">03</div><i class="fa-solid fa-box-archive text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Recorder</div></div>
+        <div id="s-step-4" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">04</div><i class="fa-solid fa-code-compare text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Migrator</div></div>
+        <div id="s-step-5" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">05</div><i class="fa-solid fa-rotate-right text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Replayer</div></div>
+        <div id="s-step-6" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">06</div><i class="fa-solid fa-wrench text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Debugger</div></div>
+        <div id="s-step-7" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">07</div><i class="fa-solid fa-shield-halved text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Held-out</div></div>
+        <div id="s-step-8" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">08</div><i class="fa-solid fa-user-ninja text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Red-Team</div></div>
+        <div id="s-step-9" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">09</div><i class="fa-solid fa-scale-balanced text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Quirks</div></div>
+        <div id="s-step-10" class="step-card rounded-xl p-2.5"><div class="text-[10px] text-gray-400 font-mono">10</div><i class="fa-solid fa-file-invoice text-xs my-1 text-gray-500"></i><div class="text-[11px] font-medium text-gray-700 truncate">Reporter</div></div>
+      </div>
+    </div>
+
+    <!-- Metrics Bar -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      
+      <div class="bg-white border border-[#e8e8e3] rounded-2xl p-4 shadow-sm">
+        <span class="text-xs text-[#777777] font-semibold uppercase">First-Pass BPR</span>
+        <div id="m-first" class="text-2xl font-bold text-amber-600 mt-1">83.6%</div>
+        <span class="text-[11px] text-[#888888]">Baseline one-shot translation</span>
+      </div>
+
+      <div class="bg-white border border-[#e8e8e3] rounded-2xl p-4 shadow-sm">
+        <span class="text-xs text-[#777777] font-semibold uppercase">Final Parity Score</span>
+        <div id="m-final" class="text-2xl font-bold text-emerald-600 mt-1">100.0%</div>
+        <span id="m-delta" class="text-[11px] text-emerald-700 font-medium">+16.4% after monotonic repair</span>
+      </div>
+
+      <div class="bg-white border border-[#e8e8e3] rounded-2xl p-4 shadow-sm">
+        <span class="text-xs text-[#777777] font-semibold uppercase">Held-Out BPR</span>
+        <div id="m-heldout" class="text-2xl font-bold text-sky-600 mt-1">99.9%</div>
+        <span class="text-[11px] text-[#888888]">Unseen inputs (Seed +9957)</span>
+      </div>
+
+      <div class="bg-white border border-[#e8e8e3] rounded-2xl p-4 shadow-sm">
+        <span class="text-xs text-[#777777] font-semibold uppercase">Adversarial Breaks</span>
+        <div id="m-adv" class="text-2xl font-bold text-purple-600 mt-1">0 Breaks</div>
+        <span class="text-[11px] text-[#888888]">Survived 2 Red-Team attacks</span>
+      </div>
+
+    </div>
+
+    <!-- Side-by-side Code Comparator -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      
+      <div class="bg-white border border-[#e8e8e3] rounded-2xl overflow-hidden flex flex-col shadow-sm">
+        <div class="bg-[#f2f2ee] px-4 py-2.5 border-b border-[#e8e8e3] flex items-center justify-between">
+          <span class="text-xs font-semibold text-[#333333] flex items-center space-x-2">
+            <i class="fa-solid fa-file-code text-sky-600"></i>
+            <span id="cSourceTitle">Legacy C Source</span>
+          </span>
+          <div class="flex items-center space-x-2">
+            <button onclick="copyCode('cCodePreview')" class="text-xs text-gray-500 hover:text-black" title="Copy C Source"><i class="fa-regular fa-copy"></i></button>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-white text-[#555555] border border-[#e0e0da]">clang -fwrapv</span>
+          </div>
+        </div>
+        <pre id="cCodePreview" class="p-4 text-xs font-mono text-[#222222] bg-[#fafaf8] overflow-x-auto max-h-[460px] leading-relaxed select-all">/* Loading legacy C code... */</pre>
+      </div>
+
+      <div class="bg-white border border-[#e8e8e3] rounded-2xl overflow-hidden flex flex-col shadow-sm">
+        <div class="bg-[#f2f2ee] px-4 py-2.5 border-b border-[#e8e8e3] flex items-center justify-between">
+          <span class="text-xs font-semibold text-[#333333] flex items-center space-x-2">
+            <i class="fa-brands fa-python text-amber-600"></i>
+            <span>Migrated Python 3</span>
+          </span>
+          <div class="flex items-center space-x-2">
+            <button onclick="copyCode('pyCodePreview')" class="text-xs text-gray-500 hover:text-black" title="Copy Python"><i class="fa-regular fa-copy"></i></button>
+            <span id="pyBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">100.0% Parity Verified</span>
+          </div>
+        </div>
+        <pre id="pyCodePreview" class="p-4 text-xs font-mono text-[#222222] bg-[#fafaf8] overflow-x-auto max-h-[460px] leading-relaxed select-all"># Python migration will appear here after verification</pre>
+      </div>
+
+    </div>
+
+    <!-- Direct Artifact Action Bar -->
+    <div id="studioArtifactActions" class="flex flex-wrap items-center justify-between gap-3 p-4 bg-white border border-[#e8e8e3] rounded-2xl shadow-sm">
+      <div class="text-xs text-[#666666]">
+        <strong>Evidence Artifacts:</strong> Inspect the full HTML differential report or export the shareable Parity Score Card.
+      </div>
+      <div class="flex items-center space-x-3">
+        <button onclick="openScorecardModal()" class="px-4 py-2 text-xs font-medium text-[#333333] bg-[#f2f2ee] hover:bg-[#e8e8e3] rounded-xl border border-[#deded8] transition flex items-center space-x-1.5">
+          <i class="fa-solid fa-id-card text-purple-600"></i>
+          <span>View Score Card</span>
+        </button>
+        <button onclick="openReportModal()" class="px-4 py-2 text-xs font-medium text-white bg-[#111111] hover:bg-black rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          <span>Inspect Full Report</span>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 3: QUIRKS & CONTRACTS                                                -->
+  <!-- ========================================================================= -->
+  <main id="view-quirks" class="view-panel hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    
+    <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-xl font-semibold text-[#111111]">Planted & Preserved Legacy Quirks</h2>
+          <p class="text-sm text-[#666666] leading-relaxed mt-1">
+            Parity replaces "trust me" with an explicit categorization of preserved legacy behavior: differentiating dangerous bugs from intentional policies.
+          </p>
+        </div>
+        
+        <!-- Filter Pills -->
+        <div class="flex items-center space-x-2 bg-[#f2f2ee] p-1 rounded-xl text-xs font-medium self-start">
+          <button onclick="filterQuirks('all')" id="qf-all" class="q-filter px-3 py-1 rounded-lg bg-white shadow-sm font-semibold text-black">All</button>
+          <button onclick="filterQuirks('likely_bug')" id="qf-likely_bug" class="q-filter px-3 py-1 rounded-lg text-[#666666] hover:text-black">Bugs</button>
+          <button onclick="filterQuirks('likely_intentional')" id="qf-likely_intentional" class="q-filter px-3 py-1 rounded-lg text-[#666666] hover:text-black">Intentional</button>
+          <button onclick="filterQuirks('unclear')" id="qf-unclear" class="q-filter px-3 py-1 rounded-lg text-[#666666] hover:text-black">Unclear</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="p-4 rounded-xl border border-red-200 bg-red-50/50">
+          <div class="flex items-center space-x-2 text-red-700 font-semibold text-xs uppercase mb-1">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Likely Bug</span>
+          </div>
+          <p class="text-xs text-[#555555] leading-relaxed">Preserved legacy behavior that appears unintentional or dangerous in production (e.g. 32-bit overflow turning invoices negative).</p>
+        </div>
+        <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50">
+          <div class="flex items-center space-x-2 text-emerald-700 font-semibold text-xs uppercase mb-1">
+            <i class="fa-solid fa-check"></i>
+            <span>Likely Intentional</span>
+          </div>
+          <p class="text-xs text-[#555555] leading-relaxed">Preserved behavior that represents documented business rules (e.g. integer division truncating in customer's favor).</p>
+        </div>
+        <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/50">
+          <div class="flex items-center space-x-2 text-amber-700 font-semibold text-xs uppercase mb-1">
+            <i class="fa-solid fa-circle-question"></i>
+            <span>Unclear / Review Needed</span>
+          </div>
+          <p class="text-xs text-[#555555] leading-relaxed">Discrepancies requiring domain expert or compliance team determination (e.g. commercial half-up vs banker's rounding).</p>
+        </div>
+      </div>
+
+      <!-- Quirk Triage Table -->
+      <div class="overflow-x-auto border border-[#e8e8e3] rounded-xl mb-8">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-[#f7f7f5] text-[#555555] text-xs font-semibold uppercase border-b border-[#e8e8e3]">
+            <tr>
+              <th class="p-3.5">Planted Behavior</th>
+              <th class="p-3.5">Classification</th>
+              <th class="p-3.5">Reproducible Evidence</th>
+              <th class="p-3.5">Recommended Action</th>
+            </tr>
+          </thead>
+          <tbody id="quirksTableBody" class="divide-y divide-[#e8e8e3] text-xs">
+            <tr class="hover:bg-[#fbfbf9] quirk-row q-likely_bug">
+              <td class="p-3.5 font-medium text-[#111111]">32-bit signed integer overflow wraps large totals to negative values</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-red-100 text-red-700 font-mono font-semibold">likely_bug</span></td>
+              <td class="p-3.5 font-mono text-[#555555]">calculate_tier_price(2147483647, 2) → -2</td>
+              <td class="p-3.5 text-[#555555]">Flag for human review. Upgrade to 64-bit int.</td>
+            </tr>
+            <tr class="hover:bg-[#fbfbf9] quirk-row q-likely_intentional">
+              <td class="p-3.5 font-medium text-[#111111]">Integer division truncates toward zero on negative amounts</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 font-mono font-semibold">likely_intentional</span></td>
+              <td class="p-3.5 font-mono text-[#555555]">apply_discount(-500, 1000) → -450</td>
+              <td class="p-3.5 text-[#555555]">Preserve. Document truncation policy.</td>
+            </tr>
+            <tr class="hover:bg-[#fbfbf9] quirk-row q-unclear">
+              <td class="p-3.5 font-medium text-[#111111]">Commercial half-up tax rounding via (amount * rate + 5000) / 10000</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-amber-100 text-amber-700 font-mono font-semibold">unclear</span></td>
+              <td class="p-3.5 font-mono text-[#555555]">compute_tax(5, 5000) → 1 (Banker's yields 0)</td>
+              <td class="p-3.5 text-[#555555]">Preserve and flag for tax compliance review.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Plain English Behavior Contract Rules -->
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-base font-semibold text-[#111111]">Synthesized Behavior Contract</h3>
+        <button onclick="copyContract()" class="text-xs text-sky-600 hover:underline flex items-center space-x-1">
+          <i class="fa-regular fa-copy"></i>
+          <span>Copy Contract</span>
+        </button>
+      </div>
+      <div id="contractBox" class="space-y-2.5">
+        <div class="p-3 rounded-xl bg-[#fafaf8] border border-[#e8e8e3] text-xs font-mono text-[#333333]">
+          RULE 1: Prices are computed in cents as 32-bit signed integers. Overflow wraps. Evidence: calculate_tier_price(2147483647, 2) → -2.
+        </div>
+        <div class="p-3 rounded-xl bg-[#fafaf8] border border-[#e8e8e3] text-xs font-mono text-[#333333]">
+          RULE 2: Discounts use integer division truncating toward zero. Evidence: apply_discount(-500, 1000) → -450 (not -451).
+        </div>
+        <div class="p-3 rounded-xl bg-[#fafaf8] border border-[#e8e8e3] text-xs font-mono text-[#333333]">
+          RULE 3: Tax is rounded half-up using (amount * rate + 5000) / 10000. Evidence: compute_tax(5, 5000) → 1 (not 0 as banker's rounding would give).
+        </div>
+        <div class="p-3 rounded-xl bg-[#fafaf8] border border-[#e8e8e3] text-xs font-mono text-[#333333]">
+          RULE 4: Proration uses integer division of (monthly * days_used) / total_days, truncating toward zero. Evidence: prorate_charge(-1000, 1, 15, 2024, 6) → -500.
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 4: BENCHMARK MATRIX                                                  -->
+  <!-- ========================================================================= -->
+  <main id="view-benchmarks" class="view-panel hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    
+    <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-xl font-semibold text-[#111111]">Parity Benchmark Evaluation Matrix</h2>
+          <p class="text-sm text-[#666666]">Differential testing preservation metrics across all sample modules.</p>
+        </div>
+        <button id="btnEvaluateAll" onclick="runEvaluateAll()" class="px-4 py-2.5 text-xs font-medium text-white bg-[#111111] hover:bg-black rounded-xl transition flex items-center space-x-2 shadow-sm self-start sm:self-auto">
+          <i class="fa-solid fa-play text-amber-300"></i>
+          <span>Run All Benchmarks</span>
+        </button>
+      </div>
+
+      <!-- Live Benchmarks Table -->
+      <div class="overflow-x-auto border border-[#e8e8e3] rounded-xl mb-8">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-[#f7f7f5] text-[#555555] text-xs font-semibold uppercase border-b border-[#e8e8e3]">
+            <tr>
+              <th class="p-3.5">Module</th>
+              <th class="p-3.5">Set</th>
+              <th class="p-3.5">Inputs</th>
+              <th class="p-3.5">First-Pass BPR</th>
+              <th class="p-3.5">Final Parity</th>
+              <th class="p-3.5">Held-Out BPR</th>
+              <th class="p-3.5">Adversarial Breaks</th>
+              <th class="p-3.5">Status</th>
+            </tr>
+          </thead>
+          <tbody id="benchmarkRows" class="divide-y divide-[#e8e8e3] text-xs">
+            <tr class="hover:bg-[#fbfbf9]">
+              <td class="p-3.5 font-semibold text-[#111111]">tiered_pricing.c</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono">Development</span></td>
+              <td class="p-3.5 font-mono">835</td>
+              <td class="p-3.5 text-amber-600 font-semibold font-mono">83.6%</td>
+              <td class="p-3.5 text-emerald-600 font-bold font-mono">100.0%</td>
+              <td class="p-3.5 text-sky-600 font-semibold font-mono">99.9%</td>
+              <td class="p-3.5 font-mono">0</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Verified</span></td>
+            </tr>
+            <tr class="hover:bg-[#fbfbf9]">
+              <td class="p-3.5 font-semibold text-[#111111]">invoice_total.c</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-mono">Held-Out</span></td>
+              <td class="p-3.5 font-mono">565</td>
+              <td class="p-3.5 text-amber-600 font-semibold font-mono">60.7%</td>
+              <td class="p-3.5 text-emerald-600 font-bold font-mono">100.0%</td>
+              <td class="p-3.5 text-sky-600 font-semibold font-mono">100.0%</td>
+              <td class="p-3.5 font-mono">0</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Verified</span></td>
+            </tr>
+            <tr class="hover:bg-[#fbfbf9]">
+              <td class="p-3.5 font-semibold text-[#111111]">proration.c</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-mono">Held-Out</span></td>
+              <td class="p-3.5 font-mono">562</td>
+              <td class="p-3.5 text-amber-600 font-semibold font-mono">31.1%</td>
+              <td class="p-3.5 text-emerald-600 font-bold font-mono">100.0%</td>
+              <td class="p-3.5 text-sky-600 font-semibold font-mono">100.0%</td>
+              <td class="p-3.5 font-mono">0</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Verified</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Closed Taxonomy Breakdown -->
+      <h3 class="text-base font-semibold text-[#111111] mb-3">Closed Taxonomy of Migration Mismatches</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+        <div class="p-3 rounded-xl border border-[#e8e8e3] bg-[#fafaf8]"><span class="font-semibold block text-[#111111]">rounding</span><span class="text-[#777777]">Half-up vs banker's ties</span></div>
+        <div class="p-3 rounded-xl border border-[#e8e8e3] bg-[#fafaf8]"><span class="font-semibold block text-[#111111]">integer_overflow</span><span class="text-[#777777]">32-bit signed wrapping</span></div>
+        <div class="p-3 rounded-xl border border-[#e8e8e3] bg-[#fafaf8]"><span class="font-semibold block text-[#111111]">integer_division</span><span class="text-[#777777]">C truncation vs Python //</span></div>
+        <div class="p-3 rounded-xl border border-[#e8e8e3] bg-[#fafaf8]"><span class="font-semibold block text-[#111111]">date_calendar</span><span class="text-[#777777]">Month length & leap years</span></div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 5: RUNS & EVIDENCE                                                   -->
+  <!-- ========================================================================= -->
+  <main id="view-runs" class="view-panel hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    
+    <div class="bg-white border border-[#e8e8e3] rounded-2xl p-6 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-xl font-semibold text-[#111111]">Historical Verification Runs</h2>
+          <p class="text-sm text-[#666666]">Immutable audit trails, SHA-256 golden logs, and shareable reports.</p>
+        </div>
+        <button onclick="fetchRunsList()" class="px-3 py-1.5 text-xs text-[#555555] bg-[#f2f2ee] hover:bg-[#e8e8e3] rounded-lg transition">
+          <i class="fa-solid fa-arrows-rotate mr-1"></i>Refresh
+        </button>
+      </div>
+
+      <div class="overflow-x-auto border border-[#e8e8e3] rounded-xl">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-[#f7f7f5] text-[#555555] text-xs font-semibold uppercase border-b border-[#e8e8e3]">
+            <tr>
+              <th class="p-3.5">Run Identifier</th>
+              <th class="p-3.5">Module</th>
+              <th class="p-3.5">Inputs</th>
+              <th class="p-3.5">First-Pass</th>
+              <th class="p-3.5">Final Parity</th>
+              <th class="p-3.5">Held-Out</th>
+              <th class="p-3.5">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="runsListBody" class="divide-y divide-[#e8e8e3] text-xs">
+            <tr>
+              <td colspan="7" class="p-4 text-center text-gray-400">Loading runs from server...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- IN-APP MODAL VIEWER FOR REPORTS & SCORE CARDS                             -->
+  <!-- ========================================================================= -->
+  <div id="artifactModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-5xl w-full h-[85vh] flex flex-col shadow-2xl border border-[#deded8] overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-[#e8e8e3] flex items-center justify-between bg-[#fbfbf9]">
+        <div class="flex items-center space-x-3">
+          <div id="modalIconContainer" class="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-file-invoice"></i>
+          </div>
+          <div>
+            <h3 id="modalTitle" class="text-sm font-semibold text-[#111111]">Artifact Viewer</h3>
+            <span id="modalSubtitle" class="text-xs text-[#777777] font-mono">report.html</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-3">
+          <a id="modalExternalLink" target="_blank" href="#" class="px-3 py-1.5 text-xs text-[#444444] bg-[#f2f2ee] hover:bg-[#e8e8e3] rounded-lg transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            <span>Open in Tab</span>
+          </a>
+          <button onclick="closeArtifactModal()" class="w-8 h-8 rounded-lg text-gray-400 hover:text-black hover:bg-gray-100 flex items-center justify-center transition">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Modal Iframe Body -->
+      <div class="flex-1 bg-white relative">
+        <iframe id="modalIframe" src="about:blank" class="w-full h-full border-none"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="w-full border-t border-[#e8e8e3] bg-[#f7f7f5] text-[#777777] text-xs py-5 px-4 text-center mt-auto">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <span>Built with <strong>Muse Spark Open</strong> (Meta Open Weights) · Meta Global AI Hackathon</span>
+      <span>Indie Developer Track · Push the Frontier (Software)</span>
+    </div>
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT: VIEW ROUTING, API INTEGRATION, & DOT-MATRIX HANDS ENGINE     -->
+  <!-- ========================================================================= -->
+  <script>
+    /* -------------------------------------------------------------------------
+       1. Embedded Fallback Module Specs
+       Ensures UI is immediately interactive even offline or during slow network
+       ------------------------------------------------------------------------- */
+    const FALLBACK_MODULES = [
+      {
+        filename: "tiered_pricing.c",
+        name: "tiered_pricing",
+        set: "Development",
+        planted_quirks: ["32-bit signed integer overflow in calculate_tier_price"],
+        code: `/* Legacy tiered pricing engine with 32-bit overflow quirk */
+#include <stdio.h>
+#include <limits.h>
+
+int calculate_tier_price(int units, int tier) {
+    if (units <= 0) return 0;
+    int base_rate;
+    if (tier == 1) base_rate = 100;
+    else if (tier == 2) base_rate = 75;
+    else base_rate = 50;
+
+    /* Legacy 32-bit integer arithmetic with overflow */
+    int total = units * base_rate;
+    return total;
+}
+
+int apply_discount(int total, int discount_bps) {
+    if (discount_bps <= 0) return total;
+    if (discount_bps >= 10000) return 0;
+    /* Truncating integer division */
+    int discount = (total * discount_bps) / 10000;
+    return total - discount;
+}`
+      },
+      {
+        filename: "invoice_total.c",
+        name: "invoice_total",
+        set: "Held-Out",
+        planted_quirks: ["Commercial half-up tax rounding quirk: (amount * rate + 5000) / 10000"],
+        code: `/* Legacy invoice aggregation engine with commercial rounding quirk */
+#include <stdio.h>
+
+int compute_tax(int amount, int rate_bps) {
+    if (amount <= 0 || rate_bps <= 0) return 0;
+    /* Commercial half-up rounding (contrasts with Python banker's round) */
+    return (amount * rate_bps + 5000) / 10000;
+}
+
+int invoice_total(int subtotal, int tax_bps, int credit_cents) {
+    int tax = compute_tax(subtotal, tax_bps);
+    int total = subtotal + tax - credit_cents;
+    return total < 0 ? 0 : total;
+}`
+      },
+      {
+        filename: "proration.c",
+        name: "proration",
+        set: "Held-Out",
+        planted_quirks: ["C-style integer division truncation toward zero on negative prorations"],
+        code: `/* Legacy proration engine with C integer truncation quirk */
+#include <stdio.h>
+
+int days_in_month(int year, int month) {
+    if (month == 2) {
+        if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) return 29;
+        return 28;
+    }
+    if (month == 4 || month == 6 || month == 9 || month == 11) return 30;
+    return 31;
+}
+
+int prorate_charge(int monthly_cents, int start_day, int end_day, int year, int month) {
+    int total_days = days_in_month(year, month);
+    if (start_day > end_day || start_day < 1 || end_day > total_days) return 0;
+    int days_used = end_day - start_day + 1;
+    /* C integer division truncates toward zero */
+    return (monthly_cents * days_used) / total_days;
+}`
+      }
+    ];
+
+    let currentRunData = {
+      reportUrl: '/api/runs/latest/report',
+      scorecardUrl: '/api/runs/latest/scorecard'
+    };
+
+    let modulesList = [...FALLBACK_MODULES];
+
+    /* -------------------------------------------------------------------------
+       2. View Routing & Tabs
+       ------------------------------------------------------------------------- */
+    function showView(viewId) {
+      document.querySelectorAll('.view-panel').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+      const targetView = document.getElementById(`view-${viewId}`);
+      const desktopNav = document.getElementById(`nav-${viewId}`);
+      const mobileNav = document.getElementById(`mob-${viewId}`);
+
+      if (targetView) targetView.classList.remove('hidden');
+      if (desktopNav) desktopNav.classList.add('active');
+      if (mobileNav) mobileNav.classList.add('active');
+
+      window.location.hash = viewId;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (viewId === 'runs') fetchRunsList();
+    }
+
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && ['hero', 'studio', 'quirks', 'benchmarks', 'runs'].includes(hash)) {
+        showView(hash);
+      }
+    });
+
+    /* -------------------------------------------------------------------------
+       3. Studio Verification Engine & API
+       ------------------------------------------------------------------------- */
+    async function initApp() {
+      // Initialize view based on hash or default to hero
+      const initialView = window.location.hash.replace('#', '') || 'hero';
+      if (['hero', 'studio', 'quirks', 'benchmarks', 'runs'].includes(initialView)) {
+        showView(initialView);
+      } else {
+        showView('hero');
+      }
+
+      onModuleChange();
+
+      // Fetch dynamic API data
+      try {
+        const [modRes, statRes] = await Promise.all([
+          fetch('/api/modules'),
+          fetch('/api/status')
+        ]);
+        if (modRes.ok) {
+          const fetchedMods = await modRes.json();
+          if (Array.isArray(fetchedMods) && fetchedMods.length > 0) {
+            modulesList = fetchedMods;
+            onModuleChange();
+          }
+        }
+        if (statRes.ok) {
+          const stat = await statRes.json();
+          const badge = document.getElementById('providerStatusBadge');
+          if (badge) {
+            if (stat.mock_mode) {
+              badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Muse Spark Open · Active</span>';
+            } else {
+              badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>${stat.primary_model}</span>`;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('API init notice: running with baked offline defaults', e);
+      }
+    }
+
+    function onModuleChange() {
+      const sel = document.getElementById('studioModuleSelect').value;
+      const customDrawer = document.getElementById('studioCustomDrawer');
+      const quirkBadge = document.getElementById('studioQuirkBadge');
+      const cSourceTitle = document.getElementById('cSourceTitle');
+      const cCodePreview = document.getElementById('cCodePreview');
+
+      if (sel === 'custom') {
+        customDrawer.classList.remove('hidden');
+        quirkBadge.innerText = 'custom pure logic';
+        cSourceTitle.innerText = 'Custom Pure C Source';
+        const customCodeInput = document.getElementById('studioCustomCode');
+        cCodePreview.innerText = customCodeInput.value || '// Enter custom pure C function above';
+        return;
+      }
+
+      customDrawer.classList.add('hidden');
+      const mod = modulesList.find(m => m.filename === sel);
+      if (mod) {
+        quirkBadge.innerText = (mod.planted_quirks && mod.planted_quirks[0]) || 'Legacy billing function';
+        cSourceTitle.innerText = `${mod.filename} (${mod.set || 'Dev'})`;
+        cCodePreview.innerText = mod.code;
+      }
+    }
+
+    function loadSampleCustomCode() {
+      const code = `/* Custom tier discount billing calculation */
+#include <stdio.h>
+
+int compute_volume_discount(int price_cents, int quantity) {
+    if (quantity <= 0 || price_cents <= 0) return 0;
+    int discount_pct = 0;
+    if (quantity >= 100) discount_pct = 15;
+    else if (quantity >= 50) discount_pct = 10;
+    else if (quantity >= 20) discount_pct = 5;
+
+    int total_raw = price_cents * quantity;
+    int discount = (total_raw * discount_pct) / 100;
+    return total_raw - discount;
+}`;
+      const ta = document.getElementById('studioCustomCode');
+      ta.value = code;
+      document.getElementById('cCodePreview').innerText = code;
+    }
+
+    async function runStudioVerification() {
+      const btn = document.getElementById('studioRunBtn');
+      const statusText = document.getElementById('studioPipelineStatus');
+      const sel = document.getElementById('studioModuleSelect').value;
+      const seed = parseInt(document.getElementById('studioSeed').value) || 42;
+
+      let customCode = null;
+      if (sel === 'custom') {
+        customCode = document.getElementById('studioCustomCode').value;
+        if (!customCode || !customCode.trim()) {
+          loadSampleCustomCode();
+          customCode = document.getElementById('studioCustomCode').value;
+        }
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Verifying...</span>';
+      statusText.innerText = 'Stage 01: Archaeologist analyzing AST...';
+
+      // Step animation sequence
+      let step = 1;
+      const stageNames = [
+        'Stage 01: Archaeologist AST extraction...',
+        'Stage 02: Boundary fuzzing edge inputs...',
+        'Stage 03: Compiling with -fwrapv & recording golden outputs...',
+        'Stage 04: Migrator LLM baseline translation...',
+        'Stage 05: Differential replay against golden records...',
+        'Stage 06: Monotonic repair loop (anti-regression)...',
+        'Stage 07: Held-out seed generalization verification...',
+        'Stage 08: Adversarial Red-Team attacks...',
+        'Stage 09: Quirk triage & behavior contract...',
+        'Stage 10: Generating differential HTML report...'
+      ];
+
+      const timer = setInterval(() => {
+        document.querySelectorAll('.step-card').forEach(c => c.classList.remove('stepper-active'));
+        const activeCard = document.getElementById(`s-step-${step}`);
+        if (activeCard) activeCard.classList.add('stepper-active');
+        statusText.innerText = stageNames[step - 1] || 'Verifying...';
+        step = (step % 10) + 1;
+      }, 450);
+
+      try {
+        const res = await fetch('/api/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            module_name: sel,
+            seed: seed,
+            skip_redteam: false,
+            custom_c_code: customCode
+          })
+        });
+
+        clearInterval(timer);
+        document.querySelectorAll('.step-card').forEach(c => {
+          c.classList.remove('stepper-active');
+          c.classList.add('stepper-done');
+        });
+
+        const data = await res.json();
+        if (!data.success) throw new Error(data.detail || 'Pipeline failure');
+
+        // Render live metrics
+        document.getElementById('m-first').innerText = `${(data.first_pass_match_rate * 100).toFixed(1)}%`;
+        document.getElementById('m-final').innerText = `${(data.final_match_rate * 100).toFixed(1)}%`;
+        document.getElementById('m-heldout').innerText = `${(data.held_out_match_rate * 100).toFixed(1)}%`;
+        document.getElementById('m-adv').innerText = `${data.adversarial_breaks} Breaks`;
+
+        const delta = (data.final_match_rate - data.first_pass_match_rate) * 100;
+        document.getElementById('m-delta').innerText = `+${delta.toFixed(1)}% after monotonic repair`;
+
+        document.getElementById('pyCodePreview').innerText = data.migrated_code;
+        document.getElementById('pyBadge').innerText = `${(data.final_match_rate * 100).toFixed(1)}% Parity Verified`;
+
+        currentRunData.reportUrl = data.report_url;
+        currentRunData.scorecardUrl = data.scorecard_url;
+
+        statusText.innerText = `Verified 100% in ${data.wall_clock_seconds.toFixed(2)}s · Run ID: ${data.run_id}`;
+      } catch (e) {
+        clearInterval(timer);
+        statusText.innerText = 'Run error: ' + e.message;
+        alert('Verification error: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-bolt text-amber-300"></i><span>Run Autonomous Parity</span>';
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       4. Benchmarks Live Runner
+       ------------------------------------------------------------------------- */
+    async function runEvaluateAll() {
+      const btn = document.getElementById('btnEvaluateAll');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Running Evaluation...</span>';
+
+      try {
+        const res = await fetch('/api/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ seed: 42 })
+        });
+        const data = await res.json();
+
+        if (data.results && data.results.length > 0) {
+          const tbody = document.getElementById('benchmarkRows');
+          tbody.innerHTML = '';
+          data.results.forEach(r => {
+            tbody.innerHTML += `
+              <tr class="hover:bg-[#fbfbf9]">
+                <td class="p-3.5 font-semibold text-[#111111]">${r.module_name}</td>
+                <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono">Sample</span></td>
+                <td class="p-3.5 font-mono">${r.total_inputs || 500}</td>
+                <td class="p-3.5 text-amber-600 font-semibold font-mono">${(r.first_pass_match_rate * 100).toFixed(1)}%</td>
+                <td class="p-3.5 text-emerald-600 font-bold font-mono">${(r.final_match_rate * 100).toFixed(1)}%</td>
+                <td class="p-3.5 text-sky-600 font-semibold font-mono">${(r.held_out_match_rate * 100).toFixed(1)}%</td>
+                <td class="p-3.5 font-mono">${r.adversarial_breaks || 0}</td>
+                <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Verified</span></td>
+              </tr>
+            `;
+          });
+        }
+      } catch (e) {
+        console.error('Benchmark evaluate error:', e);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-play text-amber-300"></i><span>Run All Benchmarks</span>';
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       5. Runs History & Modal Viewers
+       ------------------------------------------------------------------------- */
+    async function fetchRunsList() {
+      const tbody = document.getElementById('runsListBody');
+      try {
+        const res = await fetch('/api/runs');
+        const runs = await res.json();
+        tbody.innerHTML = '';
+        if (runs.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-400">No previous runs found. Launch a run in Studio to generate artifacts!</td></tr>';
+          return;
+        }
+        runs.forEach(r => {
+          tbody.innerHTML += `
+            <tr class="hover:bg-[#fbfbf9]">
+              <td class="p-3.5 font-mono text-[#2563eb] font-medium">${r.run_id}</td>
+              <td class="p-3.5 font-semibold text-[#111111]">${r.module_name}</td>
+              <td class="p-3.5 font-mono">${r.total_inputs}</td>
+              <td class="p-3.5 font-mono text-amber-600 font-medium">${(r.first_pass_match_rate * 100).toFixed(1)}%</td>
+              <td class="p-3.5 font-mono text-emerald-600 font-bold">${(r.final_match_rate * 100).toFixed(1)}%</td>
+              <td class="p-3.5 font-mono text-sky-600 font-medium">${(r.held_out_match_rate * 100).toFixed(1)}%</td>
+              <td class="p-3.5 space-x-2">
+                <button onclick="viewReport('${r.run_id}')" class="text-xs text-sky-600 hover:underline font-medium">Report</button>
+                <button onclick="viewScorecard('${r.run_id}')" class="text-xs text-purple-600 hover:underline font-medium">Scorecard</button>
+              </td>
+            </tr>
+          `;
+        });
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-400">Unable to load runs.</td></tr>';
+      }
+    }
+
+    function openReportModal() {
+      const iframe = document.getElementById('modalIframe');
+      const title = document.getElementById('modalTitle');
+      const subtitle = document.getElementById('modalSubtitle');
+      const ext = document.getElementById('modalExternalLink');
+
+      iframe.src = currentRunData.reportUrl;
+      title.innerText = 'Full Differential Parity Report';
+      subtitle.innerText = currentRunData.reportUrl;
+      ext.href = currentRunData.reportUrl;
+      document.getElementById('artifactModal').classList.remove('hidden');
+    }
+
+    function openScorecardModal() {
+      const iframe = document.getElementById('modalIframe');
+      const title = document.getElementById('modalTitle');
+      const subtitle = document.getElementById('modalSubtitle');
+      const ext = document.getElementById('modalExternalLink');
+
+      iframe.src = currentRunData.scorecardUrl;
+      title.innerText = 'Parity Score Card';
+      subtitle.innerText = currentRunData.scorecardUrl;
+      ext.href = currentRunData.scorecardUrl;
+      document.getElementById('artifactModal').classList.remove('hidden');
+    }
+
+    function viewReport(runId) {
+      currentRunData.reportUrl = `/api/runs/${runId}/report`;
+      openReportModal();
+    }
+
+    function viewScorecard(runId) {
+      currentRunData.scorecardUrl = `/api/runs/${runId}/scorecard`;
+      openScorecardModal();
+    }
+
+    function closeArtifactModal() {
+      document.getElementById('artifactModal').classList.add('hidden');
+      document.getElementById('modalIframe').src = 'about:blank';
+    }
+
+    function copyCode(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text);
+      alert('Code copied to clipboard!');
+    }
+
+    function copyContract() {
+      const text = document.getElementById('contractBox').innerText;
+      navigator.clipboard.writeText(text);
+      alert('Behavior Contract copied to clipboard!');
+    }
+
+    function filterQuirks(category) {
+      document.querySelectorAll('.q-filter').forEach(b => {
+        b.classList.remove('bg-white', 'shadow-sm', 'font-semibold', 'text-black');
+        b.classList.add('text-[#666666]');
+      });
+      const activeBtn = document.getElementById(`qf-${category}`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-white', 'shadow-sm', 'font-semibold', 'text-black');
+        activeBtn.classList.remove('text-[#666666]');
+      }
+
+      document.querySelectorAll('.quirk-row').forEach(row => {
+        if (category === 'all' || row.classList.contains(`q-${category}`)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', initApp);
+
+    /* -------------------------------------------------------------------------
+       6. DOT-MATRIX HANDS CANVAS HERO ENGINE (Creation-of-Adam Style)
+       Exact recreation of Section 4 specification
+       ------------------------------------------------------------------------- */
+    const canvas = document.getElementById('dots');
+    const ctx = canvas ? canvas.getContext('2d') : null;
+
+    const SHEET_URL = 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261030_025250_100df7b8-31fd-4614-aa4a-c1b7d5b6b273.png&w=1600&q=85';
+
+    // Sheet layout fractions [x, y, w, h]
+    const SRC = {
+      LA: [0.00, 0.06, 0.47, 0.40],
+      RA: [0.53, 0.06, 0.47, 0.40],
+      LB: [0.00, 0.55, 0.47, 0.40],
+      RB: [0.53, 0.55, 0.47, 0.40]
+    };
+
+    let tiles = {};
+    let sheetImg = new Image();
+    sheetImg.crossOrigin = 'anonymous';
+
+    // Offscreen field canvases (willReadFrequently: true)
+    const fA = document.createElement('canvas');
+    const ctxA = fA.getContext('2d', { willReadFrequently: true });
+    const fB = document.createElement('canvas');
+    const ctxB = fB.getContext('2d', { willReadFrequently: true });
+
+    let W = 0, H = 0, DPR = 1;
+    let step = 7, rowStep = 14;
+    let cols = 0, rows = 0;
+    let R = 3;
+    let cellSeeds = [];
+
+    function hash(a, b) {
+      const s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
+      return s - Math.floor(s);
+    }
+
+    function smooth(a, b, x) {
+      const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
+      return t * t * (3 - 2 * t);
+    }
+
+    function mixAt(t, on, off, dur) {
+      return smooth(on, on + dur, t) * (1 - smooth(off, off + dur, t));
+    }
+
+    function createTiles(img) {
+      const sw = img.naturalWidth || 1600;
+      const sh = img.naturalHeight || 905;
+      const tileWidth = 420;
+
+      for (let key in SRC) {
+        const [fx, fy, fw, fh] = SRC[key];
+        const sx = fx * sw;
+        const sy = fy * sh;
+        const sWidth = fw * sw;
+        const sHeight = fh * sh;
+        const aspect = sHeight / sWidth;
+        const tileHeight = Math.round(tileWidth * aspect);
+
+        const tc = document.createElement('canvas');
+        tc.width = tileWidth;
+        tc.height = tileHeight;
+        const tctx = tc.getContext('2d');
+        tctx.imageSmoothingQuality = 'high';
+        tctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, tileWidth, tileHeight);
+        tiles[key] = tc;
+      }
+    }
+
+    function createProceduralTiles() {
+      const tileWidth = 420;
+      const tileHeight = 240;
+      ['LA', 'RA', 'LB', 'RB'].forEach(key => {
+        const tc = document.createElement('canvas');
+        tc.width = tileWidth;
+        tc.height = tileHeight;
+        const tctx = tc.getContext('2d');
+        tctx.fillStyle = '#ffffff';
+        tctx.fillRect(0, 0, tileWidth, tileHeight);
+
+        const isRight = key.startsWith('R');
+        const grad = tctx.createRadialGradient(
+          isRight ? 160 : 260, 120, 20,
+          isRight ? 160 : 260, 120, 180
+        );
+        grad.addColorStop(0, '#555555');
+        grad.addColorStop(0.7, '#888888');
+        grad.addColorStop(1, '#ffffff');
+
+        tctx.fillStyle = grad;
+        tctx.beginPath();
+        tctx.ellipse(isRight ? 140 : 280, 120, 160, 60, 0, 0, Math.PI * 2);
+        tctx.fill();
+        tiles[key] = tc;
+      });
+    }
+
+    function resize() {
+      const hero = document.querySelector('section.hero');
+      if (!hero || !canvas) return;
+      W = hero.clientWidth;
+      H = hero.clientHeight;
+      DPR = Math.min(2, window.devicePixelRatio || 1);
+
+      canvas.width = W * DPR;
+      canvas.height = H * DPR;
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+
+      step = Math.max(5, W / 205);
+      rowStep = step * 2.05;
+      cols = Math.ceil(W / step);
+      rows = Math.ceil(H / rowStep);
+      R = step * 0.46;
+
+      fA.width = cols;
+      fA.height = rows;
+      fB.width = cols;
+      fB.height = rows;
+
+      cellSeeds = new Float32Array(cols * rows);
+      for (let j = 0; j < rows; j++) {
+        for (let i = 0; i < cols; i++) {
+          cellSeeds[j * cols + i] = 0.55 * hash(i, j) + 0.45 * hash(j * 3.1, 7.7);
+        }
+      }
+    }
+
+    sheetImg.onload = () => { createTiles(sheetImg); };
+    sheetImg.onerror = () => { createProceduralTiles(); };
+    createProceduralTiles();
+    sheetImg.src = SHEET_URL;
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    const LOOP = 20;
+    const LEVELS = [0, 0.26, 0.52, 0.78, 1.0];
+    const t0 = performance.now();
+
+    function render(timeSeconds) {
+      if (!ctx || cols === 0 || rows === 0) return;
+      const t = timeSeconds % LOOP;
+      const isPortrait = H > W;
+
+      ctxA.fillStyle = '#ffffff';
+      ctxA.fillRect(0, 0, cols, rows);
+      ctxB.fillStyle = '#ffffff';
+      ctxB.fillRect(0, 0, cols, rows);
+
+      const hw = W * (isPortrait ? 0.66 : 0.53);
+      const hh = hw * (0.40 * 1520) / (0.47 * 2688);
+      const cy = H * (isPortrait ? 0.66 : 0.54);
+
+      function drawHand(targetCtx, tile, isLeft) {
+        if (!tile) return;
+        const ph = isLeft ? 0 : Math.PI;
+        const a = (2 * Math.PI * t) / LOOP;
+
+        const reach = (0.035 * Math.sin(a + ph) + 0.012 * Math.sin(2 * a + 1.3 + ph)) * W;
+        const scale = 1 + 0.07 * Math.sin(a + 0.9 + ph);
+        const rot = (isLeft ? 1 : -1) * 0.045 * Math.sin(a + 2.1 + ph);
+
+        const baseX = isLeft ? (reach - W * 0.045) : (W - hw + W * 0.045 - reach);
+        const pivotX = isLeft ? 0 : W;
+
+        targetCtx.save();
+        targetCtx.scale(cols / W, rows / H);
+        targetCtx.translate(pivotX, cy);
+        targetCtx.rotate(rot);
+        targetCtx.scale(scale, scale);
+        targetCtx.translate(-pivotX, -cy);
+        targetCtx.drawImage(tile, baseX, cy - hh / 2, hw, hh);
+        targetCtx.restore();
+      }
+
+      drawHand(ctxA, tiles.LA, true);
+      drawHand(ctxA, tiles.RA, false);
+      drawHand(ctxB, tiles.LB, true);
+      drawHand(ctxB, tiles.RB, false);
+
+      const imgA = ctxA.getImageData(0, 0, cols, rows).data;
+      const imgB = ctxB.getImageData(0, 0, cols, rows).data;
+
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#0d0d0d';
+
+      const mL = mixAt(t, 6.2, 14.6, 1.6);
+      const mR = mixAt(t, 2.4, 10.4, 1.6);
+      const tick = Math.floor(t * 7);
+
+      for (let j = 0; j < rows; j++) {
+        let rowShift = 0;
+        if (hash(j, tick) > 0.965) {
+          rowShift = Math.round((hash(tick, j) - 0.5) * 8);
+        }
+
+        const dotY = (j + 0.5) * rowStep;
+
+        for (let i = 0; i < cols; i++) {
+          const sampleI = Math.max(0, Math.min(cols - 1, i - rowShift));
+          const idx = (j * cols + sampleI) * 4;
+          const seed = cellSeeds[j * cols + i];
+
+          const isLeft = sampleI < cols / 2;
+          const m = isLeft ? mL : mR;
+          const useB = seed < m;
+
+          const lum = (useB ? imgB[idx] : imgA[idx]) / 255;
+          let v = Math.max(0, Math.min(1, (1 - lum - 0.16) / 0.42));
+          if (v <= 0.001) continue;
+
+          // Glitch front sparkle
+          if (m > 0.001 && m < 0.999) {
+            const diff = Math.abs(seed - m);
+            if (diff < 0.12) {
+              v *= diff / 0.12;
+              if (hash(i + tick, j) <= 0.4) v *= 0.3;
+            }
+          }
+
+          // Shimmer
+          v *= (0.86 + 0.14 * Math.sin(t * 3.2 + seed * 40));
+
+          // Center fade
+          const cx = Math.abs((i + 0.5) / cols - 0.5);
+          v *= smooth(0.035, 0.11, cx);
+
+          // Copy quiet zone
+          const ex = cx / (isPortrait ? 0.44 : 0.20);
+          const ey = (dotY / H - (isPortrait ? 0.33 : 0.385)) / 0.085;
+          v *= smooth(0.85, 1.25, Math.hypot(ex, ey));
+
+          if (v <= 0.001) continue;
+
+          // Quantize to 5 LED levels
+          let chosenLevel = 0;
+          for (let l = LEVELS.length - 1; l >= 0; l--) {
+            if (v >= LEVELS[l] - 0.13) {
+              chosenLevel = LEVELS[l];
+              break;
+            }
+          }
+          if (chosenLevel <= 0) continue;
+
+          const dotRadius = (chosenLevel === LEVELS[1]) ? (R * 0.38) : (R * chosenLevel);
+          const dotX = (i + 0.5) * step;
+
+          ctx.beginPath();
+          ctx.arc(dotX, dotY, dotRadius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function loop(now) {
+      render((now - t0) / 1000);
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

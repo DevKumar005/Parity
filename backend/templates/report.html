@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parity Report — {{ module_name }}</title>
+<style>
+  :root {
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --dark: #0f172a;
+    --darker: #020617;
+    --card-bg: #1e293b;
+    --card-border: #334155;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --accent-gradient: linear-gradient(135deg, #1e3a5f 0%, #312e81 50%, #1e3a5f 100%);
+    --card-radius: 12px;
+    --section-gap: 2rem;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background: var(--darker);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .header {
+    background: var(--accent-gradient);
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+    border-bottom: 1px solid var(--card-border);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+    position: relative;
+  }
+  .header h1 .module-name {
+    color: var(--purple);
+  }
+  .header .subtitle {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    position: relative;
+  }
+  .header .subtitle .count {
+    color: var(--green);
+    font-weight: 600;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  .section {
+    margin-bottom: var(--section-gap);
+  }
+  .section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-title .icon {
+    font-size: 1.2rem;
+  }
+
+  /* ── Summary Cards ────────────────────────── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: var(--section-gap);
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+  .card .label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+  .card .value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .card .detail {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 0.25rem;
+  }
+  .rate-green { color: var(--green); }
+  .rate-yellow { color: var(--yellow); }
+  .rate-red { color: var(--red); }
+
+  /* ── Bar Chart ────────────────────────────── */
+  .chart-container {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    padding: 2rem;
+  }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.2rem;
+    gap: 1rem;
+  }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-label {
+    width: 130px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .bar-track {
+    flex: 1;
+    height: 32px;
+    background: var(--dark);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 1s ease;
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--dark);
+    min-width: 48px;
+  }
+  .bar-fill.green { background: linear-gradient(90deg, #22c55e, #4ade80); }
+  .bar-fill.yellow { background: linear-gradient(90deg, #eab308, #facc15); }
+  .bar-fill.red { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+  /* ── Timeline ─────────────────────────────── */
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--card-border);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1.5rem;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--purple);
+    border: 2px solid var(--card-bg);
+  }
+  .timeline-item .stage {
+    font-weight: 600;
+    color: var(--blue);
+    font-size: 0.95rem;
+  }
+  .timeline-item .description {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+  }
+  .timeline-item .duration {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+  }
+
+  /* ── Tables ───────────────────────────────── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .data-table th {
+    background: var(--dark);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    border-bottom: 2px solid var(--card-border);
+  }
+  .data-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--card-border);
+    vertical-align: top;
+  }
+  .data-table tr:hover td {
+    background: rgba(59, 130, 246, 0.05);
+  }
+  .data-table .mono {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+  }
+  .table-wrapper {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+  }
+
+  /* ── Labels / Badges ──────────────────────── */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .badge-bug { background: rgba(239, 68, 68, 0.2); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.3); }
+  .badge-intentional { background: rgba(34, 197, 94, 0.2); color: var(--green); border: 1px solid rgba(34, 197, 94, 0.3); }
+  .badge-unclear { background: rgba(234, 179, 8, 0.2); color: var(--yellow); border: 1px solid rgba(234, 179, 8, 0.3); }
+
+  /* ── Contract ─────────────────────────────── */
+  .contract-list {
+    list-style: none;
+    padding: 0;
+  }
+  .contract-list li {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    display: flex;
+    gap: 0.75rem;
+  }
+  .contract-list .rule-num {
+    color: var(--purple);
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    min-width: 28px;
+  }
+
+  /* ── Not Verified ─────────────────────────── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.75rem;
+  }
+  .info-item {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .info-item .info-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.25rem;
+  }
+  .info-item .info-value {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    color: var(--text);
+    word-break: break-all;
+  }
+
+  /* ── Footer ───────────────────────────────── */
+  .footer {
+    text-align: center;
+    padding: 2rem;
+    margin-top: 2rem;
+    border-top: 1px solid var(--card-border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+  .footer .brand {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--purple);
+    margin-bottom: 0.5rem;
+  }
+  .footer .built-with {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+
+  /* ── Responsive ───────────────────────────── */
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.8rem; }
+    .cards { grid-template-columns: repeat(2, 1fr); }
+    .bar-label { width: 80px; font-size: 0.8rem; }
+    .container { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <h1>Parity Report — <span class="module-name">{{ module_name }}</span></h1>
+  <p class="subtitle">
+    Verified identical on <span class="count">{{ verified_count }}</span> of
+    <span class="count">{{ total_inputs }}</span> recorded behaviors
+  </p>
+</div>
+
+<div class="container">
+
+  <!-- ═══ SUMMARY CARDS ═══ -->
+  <div class="cards">
+    <div class="card">
+      <div class="label">First-Pass Rate</div>
+      <div class="value {{ first_pass_color }}">{{ "%.1f"|format(first_pass_rate * 100) }}%</div>
+      <div class="detail">Before any debugging</div>
+    </div>
+    <div class="card">
+      <div class="label">Final Rate</div>
+      <div class="value {{ final_color }}">{{ "%.1f"|format(final_rate * 100) }}%</div>
+      <div class="detail">After {{ repair_rounds }} debug round{{ 's' if repair_rounds != 1 }}</div>
+    </div>
+    <div class="card">
+      <div class="label">Held-Out Rate</div>
+      <div class="value {{ held_out_color }}">{{ "%.1f"|format(held_out_rate * 100) }}%</div>
+      <div class="detail">Unseen test inputs</div>
+    </div>
+    <div class="card">
+      <div class="label">Adversarial Breaks</div>
+      <div class="value {% if adversarial_breaks > 0 %}rate-red{% else %}rate-green{% endif %}">{{ adversarial_breaks }}</div>
+      <div class="detail">{{ adversarial_fixed }} fixed by patching</div>
+    </div>
+  </div>
+
+  <!-- ═══ BAR CHART ═══ -->
+  <div class="section">
+    <h2 class="section-title"><span class="icon">📊</span> Match Rate Progression</h2>
+    <div class="chart-container">
+      <div class="bar-row">
+        <div class="bar-label">First-Pass</div>
+        <div class="bar-track">
+          <div class="bar-fill {{ first_pass_bar }}" style="width: {{ (first_pass_rate * 100)|round|int }}%">
+            {{ "%.1f"|format(first_pass_rate * 100) }}%
+          </div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Final</div>
+        <div class="bar-track">
+          <div class="bar-fill {{ final_bar }}" style="width: {{ (final_rate * 100)|round|int }}%">
+            {{ "%.1f"|format(final_rate * 100) }}%
+          </div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Held-Out</div>
+        <div class="bar-track">
+          <div class="bar-fill {{ held_out_bar }}" style="width: {{ (held_out_rate * 100)|round|int }}%">
+            {{ "%.1f"|format(held_out_rate * 100) }}%
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ AGENT TIMELINE ═══ -->
+  <div class="section">
+    <h2 class="section-title"><span class="icon">🕐</span> Agent Timeline</h2>
+    <div class="timeline">
+      {% for stage in timeline %}
+      <div class="timeline-item">
+        <div class="stage">{{ stage.name }}</div>
+        <div class="description">{{ stage.description }}</div>
+        {% if stage.duration %}<div class="duration">{{ stage.duration }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ═══ REMAINING DIFFERENCES ═══ -->
+  {% if remaining_mismatches %}
+  <div class="section">
+    <h2 class="section-title"><span class="icon">⚠️</span> Remaining Differences</h2>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Function</th>
+            <th>Input</th>
+            <th>Expected</th>
+            <th>Actual</th>
+            <th>Diagnosis</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in remaining_mismatches %}
+          <tr>
+            <td class="mono">{{ m.function }}</td>
+            <td class="mono">{{ m.args }}</td>
+            <td class="mono">{{ m.expected }}</td>
+            <td class="mono">{{ m.actual }}</td>
+            <td><span class="badge badge-bug">{{ m.diagnosis }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ═══ QUIRK TABLE ═══ -->
+  {% if quirks %}
+  <div class="section">
+    <h2 class="section-title"><span class="icon">🔍</span> Quirk Triage</h2>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Behavior</th>
+            <th>Label</th>
+            <th>Evidence</th>
+            <th>Recommended Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for q in quirks %}
+          <tr>
+            <td>{{ q.behavior }}</td>
+            <td>
+              {% if q.label == 'likely_bug' %}
+                <span class="badge badge-bug">Likely Bug</span>
+              {% elif q.label == 'likely_intentional' %}
+                <span class="badge badge-intentional">Intentional</span>
+              {% else %}
+                <span class="badge badge-unclear">Unclear</span>
+              {% endif %}
+            </td>
+            <td style="font-size:0.85rem; color: var(--text-muted);">{{ q.evidence }}</td>
+            <td style="font-size:0.85rem;">{{ q.action }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ═══ BEHAVIOR CONTRACT ═══ -->
+  {% if behavior_contract %}
+  <div class="section">
+    <h2 class="section-title"><span class="icon">📜</span> Behavior Contract</h2>
+    <ol class="contract-list">
+      {% for rule in behavior_contract %}
+      <li>
+        <span class="rule-num">{{ loop.index }}.</span>
+        <span>{{ rule }}</span>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+  {% endif %}
+
+  <!-- ═══ NOT VERIFIED ═══ -->
+  <div class="section">
+    <h2 class="section-title"><span class="icon">ℹ️</span> Scope & Limitations</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">Total Test Inputs</div>
+        <div class="info-value">{{ total_inputs }}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Golden File Hash</div>
+        <div class="info-value">{{ golden_hash[:16] }}…</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Wall Clock Time</div>
+        <div class="info-value">{{ "%.1f"|format(wall_clock_seconds) }}s</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Total Cost</div>
+        <div class="info-value">${{ "%.4f"|format(total_cost) }}</div>
+      </div>
+      {% for seed_name, seed_val in seeds.items() %}
+      <div class="info-item">
+        <div class="info-label">Seed: {{ seed_name }}</div>
+        <div class="info-value">{{ seed_val }}</div>
+      </div>
+      {% endfor %}
+      <div class="info-item">
+        <div class="info-label">Scope Limits</div>
+        <div class="info-value">Single-module, no concurrency, no I/O side-effects</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ USAGE LEDGER ═══ -->
+  {% if usage_ledger %}
+  <div class="section">
+    <h2 class="section-title"><span class="icon">💰</span> Usage Ledger</h2>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Model</th>
+            <th>Role</th>
+            <th>Purpose</th>
+            <th>Tokens (In/Out)</th>
+            <th>Cost</th>
+            <th>Latency</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in usage_ledger %}
+          <tr>
+            <td>{{ u.provider }}</td>
+            <td class="mono" style="font-size:0.8rem;">{{ u.model }}</td>
+            <td>{{ u.role }}</td>
+            <td style="font-size:0.85rem; max-width:200px;">{{ u.purpose }}</td>
+            <td class="mono">{{ u.input_tokens }}/{{ u.output_tokens }}</td>
+            <td class="mono">${{ "%.4f"|format(u.cost) }}</td>
+            <td class="mono">{{ "%.0f"|format(u.latency) }}ms</td>
+          </tr>
+          {% endfor %}
+          <tr style="font-weight:600; background: var(--dark);">
+            <td colspan="4" style="text-align:right;">TOTAL</td>
+            <td class="mono">{{ total_tokens_in }}/{{ total_tokens_out }}</td>
+            <td class="mono">${{ "%.4f"|format(total_cost) }}</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<div class="footer">
+  <div class="brand">⚖️ Parity</div>
+  <div>Behavioral equivalence verification for legacy code migration</div>
+  <div class="built-with">✨ Built with Muse Spark Open</div>
+  <div style="margin-top: 0.75rem; font-size: 0.8rem;">Generated {{ timestamp }}</div>
+</div>
+
+</body>
+</html>
