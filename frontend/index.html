@@ -159,6 +159,11 @@
       background-color: rgba(17, 17, 17, 0.45);
       backdrop-filter: blur(4px);
     }
+
+    /* Force view panel hide when hidden class is present */
+    .view-panel.hidden {
+      display: none !important;
+    }
   </style>
 </head>
 
@@ -220,7 +225,9 @@
     </div>
   </header>
 
-  <!-- VIEW 1: HERO HOMEPAGE (DOT-MATRIX HANDS CANVAS HERO)
+  <!-- ========================================================================= -->
+  <!-- VIEW 1: HERO HOMEPAGE (DOT-MATRIX HANDS CANVAS HERO)                      -->
+  <!-- ========================================================================= -->
   <main id="view-hero" class="view-panel flex-1 flex flex-col">
 
     <!-- Hero Canvas Section -->
@@ -473,7 +480,7 @@
     </div>
 
     <!-- Metrics Bar -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 
       <div class="bg-white border border-[#e8e8e3] rounded-2xl p-4 shadow-sm">
         <span class="text-xs text-[#777777] font-semibold uppercase">First-Pass BPR</span>
@@ -831,11 +838,12 @@
   <!-- ========================================================================= -->
   <!-- IN-APP MODAL VIEWER FOR REPORTS & SCORE CARDS                             -->
   <!-- ========================================================================= -->
-  <div id="artifactModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+  <div id="artifactModal" onclick="if(event.target === this) closeArtifactModal()"
+    class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-2 sm:p-4">
     <div
-      class="bg-white rounded-2xl max-w-5xl w-full h-[85vh] flex flex-col shadow-2xl border border-[#deded8] overflow-hidden">
+      class="bg-white rounded-2xl max-w-5xl w-full h-[92vh] sm:h-[85vh] flex flex-col shadow-2xl border border-[#deded8] overflow-hidden">
       <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-[#e8e8e3] flex items-center justify-between bg-[#fbfbf9]">
+      <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-[#e8e8e3] flex items-center justify-between bg-[#fbfbf9]">
         <div class="flex items-center space-x-3">
           <div id="modalIconContainer"
             class="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-xs">
@@ -863,6 +871,13 @@
         <iframe id="modalIframe" src="about:blank" class="w-full h-full border-none"></iframe>
       </div>
     </div>
+  </div>
+
+  <!-- Floating Toast Notification -->
+  <div id="toast"
+    class="fixed bottom-6 right-6 z-50 bg-[#111111] text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium transition-all duration-300 opacity-0 pointer-events-none transform translate-y-2 flex items-center space-x-2">
+    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastMsg">Notification</span>
   </div>
 
   <!-- FOOTER -->
@@ -983,7 +998,11 @@ int prorate_charge(int monthly_cents, int start_day, int end_day, int year, int 
       window.location.hash = viewId;
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
-      if (viewId === 'runs') fetchRunsList();
+      if (viewId === 'hero') {
+        if (typeof resize === 'function') resize();
+      } else if (viewId === 'runs') {
+        fetchRunsList();
+      }
     }
 
     window.addEventListener('hashchange', () => {
@@ -1009,14 +1028,35 @@ int prorate_charge(int monthly_cents, int start_day, int end_day, int year, int 
 
       // Fetch dynamic API data
       try {
-        const [modRes, statRes] = await Promise.all([
+        const [modRes, statRes, runsRes] = await Promise.all([
           fetch('/api/modules'),
-          fetch('/api/status')
+          fetch('/api/status'),
+          fetch('/api/runs')
         ]);
         if (modRes.ok) {
           const fetchedMods = await modRes.json();
           if (Array.isArray(fetchedMods) && fetchedMods.length > 0) {
             modulesList = fetchedMods;
+            const selectEl = document.getElementById('studioModuleSelect');
+            if (selectEl) {
+              const currentVal = selectEl.value;
+              selectEl.innerHTML = '';
+              modulesList.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.filename;
+                const quirkDesc = (m.planted_quirks && m.planted_quirks[0]) ? ` · ${m.planted_quirks[0]}` : '';
+                opt.innerText = `${m.filename} (${m.set || 'Dev'}${quirkDesc})`;
+                selectEl.appendChild(opt);
+              });
+              const customOpt = document.createElement('option');
+              customOpt.value = 'custom';
+              customOpt.innerText = '✍️ Custom C Code (Paste your own pure function)';
+              selectEl.appendChild(customOpt);
+
+              if ([...selectEl.options].some(o => o.value === currentVal)) {
+                selectEl.value = currentVal;
+              }
+            }
             onModuleChange();
           }
         }
@@ -1029,6 +1069,13 @@ int prorate_charge(int monthly_cents, int start_day, int end_day, int year, int 
             } else {
               badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>${stat.primary_model}</span>`;
             }
+          }
+        }
+        if (runsRes && runsRes.ok) {
+          const runs = await runsRes.json();
+          if (Array.isArray(runs) && runs.length > 0) {
+            currentRunData.reportUrl = `/api/runs/${runs[0].run_id}/report`;
+            currentRunData.scorecardUrl = `/api/runs/${runs[0].run_id}/scorecard`;
           }
         }
       } catch (e) {
@@ -1136,13 +1183,16 @@ int compute_volume_discount(int price_cents, int quantity) {
         });
 
         clearInterval(timer);
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.detail || data.error || 'Pipeline verification failure');
+        }
+
         document.querySelectorAll('.step-card').forEach(c => {
           c.classList.remove('stepper-active');
           c.classList.add('stepper-done');
         });
-
-        const data = await res.json();
-        if (!data.success) throw new Error(data.detail || 'Pipeline failure');
 
         // Render live metrics
         document.getElementById('m-first').innerText = `${(data.first_pass_match_rate * 100).toFixed(1)}%`;
@@ -1160,10 +1210,12 @@ int compute_volume_discount(int price_cents, int quantity) {
         currentRunData.scorecardUrl = data.scorecard_url;
 
         statusText.innerText = `Verified 100% in ${data.wall_clock_seconds.toFixed(2)}s · Run ID: ${data.run_id}`;
+        showToast('Parity verification complete!');
       } catch (e) {
         clearInterval(timer);
+        document.querySelectorAll('.step-card').forEach(c => c.classList.remove('stepper-active'));
         statusText.innerText = 'Run error: ' + e.message;
-        alert('Verification error: ' + e.message);
+        showToast('Error: ' + e.message);
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-bolt text-amber-300"></i><span>Run Autonomous Parity</span>';
@@ -1287,17 +1339,63 @@ int compute_volume_discount(int price_cents, int quantity) {
       document.getElementById('modalIframe').src = 'about:blank';
     }
 
+    let toastTimeout = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      if (!toast || !toastMsg) return;
+      toastMsg.innerText = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+      }, 2500);
+    }
+
+    function copyText(text, successMsg) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text)
+          .then(() => showToast(successMsg))
+          .catch(() => fallbackCopy(text, successMsg));
+      } else {
+        fallbackCopy(text, successMsg);
+      }
+    }
+
+    function fallbackCopy(text, successMsg) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast(successMsg);
+      } catch (err) {
+        showToast('Unable to copy text');
+      }
+      document.body.removeChild(ta);
+    }
+
     function copyCode(elementId) {
-      const text = document.getElementById(elementId).innerText;
-      navigator.clipboard.writeText(text);
-      alert('Code copied to clipboard!');
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      copyText(el.innerText, 'Code copied to clipboard!');
     }
 
     function copyContract() {
-      const text = document.getElementById('contractBox').innerText;
-      navigator.clipboard.writeText(text);
-      alert('Behavior Contract copied to clipboard!');
+      const el = document.getElementById('contractBox');
+      if (!el) return;
+      copyText(el.innerText, 'Behavior Contract copied to clipboard!');
     }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeArtifactModal();
+    });
 
     function filterQuirks(category) {
       document.querySelectorAll('.q-filter').forEach(b => {
@@ -1423,6 +1521,7 @@ int compute_volume_discount(int price_cents, int quantity) {
     function resize() {
       const hero = document.querySelector('section.hero');
       if (!hero || !canvas) return;
+      if (hero.clientWidth === 0 || hero.clientHeight === 0) return;
       W = hero.clientWidth;
       H = hero.clientHeight;
       DPR = Math.min(2, window.devicePixelRatio || 1);
@@ -1464,7 +1563,7 @@ int compute_volume_discount(int price_cents, int quantity) {
     const t0 = performance.now();
 
     function render(timeSeconds) {
-      if (!ctx || cols === 0 || rows === 0) return;
+      if (!ctx || cols === 0 || rows === 0 || canvas.offsetParent === null) return;
       const t = timeSeconds % LOOP;
       const isPortrait = H > W;
 

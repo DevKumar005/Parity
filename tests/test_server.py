@@ -36,3 +36,13 @@ def test_api_run_tiered_pricing():
     assert data["final_match_rate"] == 1.0
     assert "run_id" in data
     assert "migrated_code" in data
+
+
+def test_api_runs_latest():
+    r_rep = client.get("/api/runs/latest/report")
+    assert r_rep.status_code == 200
+    assert "<!DOCTYPE html>" in r_rep.text
+
+    r_sc = client.get("/api/runs/latest/scorecard")
+    assert r_sc.status_code == 200
+    assert "<!DOCTYPE html>" in r_sc.text

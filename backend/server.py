@@ -236,10 +236,25 @@ def list_runs() -> list[dict[str, Any]]:
     return runs
 
 
+def _resolve_run_dir(run_id: str) -> Optional[Path]:
+    """Resolve a run directory by ID or retrieve the latest valid run."""
+    if run_id == "latest":
+        if RUNS_DIR.exists():
+            for r_dir in sorted(RUNS_DIR.iterdir(), reverse=True):
+                if r_dir.is_dir() and ((r_dir / "report.html").exists() or (r_dir / "scorecard.html").exists()):
+                    return r_dir
+        return None
+    r_dir = RUNS_DIR / run_id
+    return r_dir if r_dir.exists() and r_dir.is_dir() else None
+
+
 @app.get("/api/runs/{run_id}/report")
 def get_run_report(run_id: str):
     """Serve HTML report for a specific run."""
-    report_file = RUNS_DIR / run_id / "report.html"
+    r_dir = _resolve_run_dir(run_id)
+    if not r_dir:
+        raise HTTPException(status_code=404, detail="Run not found")
+    report_file = r_dir / "report.html"
     if not report_file.exists():
         raise HTTPException(status_code=404, detail="Report HTML not found for run")
     return HTMLResponse(content=report_file.read_text(encoding="utf-8"))
@@ -248,7 +263,10 @@ def get_run_report(run_id: str):
 @app.get("/api/runs/{run_id}/scorecard")
 def get_run_scorecard(run_id: str):
     """Serve Scorecard HTML for a specific run."""
-    scorecard_file = RUNS_DIR / run_id / "scorecard.html"
+    r_dir = _resolve_run_dir(run_id)
+    if not r_dir:
+        raise HTTPException(status_code=404, detail="Run not found")
+    scorecard_file = r_dir / "scorecard.html"
     if not scorecard_file.exists():
         raise HTTPException(status_code=404, detail="Scorecard HTML not found for run")
     return HTMLResponse(content=scorecard_file.read_text(encoding="utf-8"))
