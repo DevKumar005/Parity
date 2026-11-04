@@ -72,14 +72,14 @@ def replay_and_compare(
     Returns:
         Tuple of (match_rate, list_of_mismatches).
     """
-    console.rule("[bold cyan]▶ Replayer — Comparing Against Golden[/]")
+    console.rule("[bold cyan]Replayer — Comparing Against Golden[/]")
 
     # Load the migrated module
     try:
         module = _load_migrated_module(migrated_path)
         console.print(f"  Loaded: [dim]{migrated_path}[/]")
     except Exception as exc:
-        console.print(f"  [red]✗ Failed to load migrated module: {exc}[/]")
+        console.print(f"  [red][ERROR] Failed to load migrated module: {exc}[/]")
         # All records are mismatches
         mismatches = [
             Mismatch(
@@ -136,7 +136,7 @@ def replay_and_compare(
     console.print(f"  Mismatches:     {len(mismatches)}")
 
     if match_rate >= 1.0:
-        console.print(f"  Match rate:     [bold green]{match_rate:.1%}[/] 🎉")
+        console.print(f"  Match rate:     [bold green]{match_rate:.1%}[/]")
     elif match_rate >= 0.9:
         console.print(f"  Match rate:     [bold yellow]{match_rate:.1%}[/]")
     else:
@@ -181,6 +181,6 @@ def replay_and_compare(
     ]
     mismatch_path.write_text(json.dumps(mismatch_data, indent=2), encoding="utf-8")
 
-    console.print(f"  [green]✓ Replay complete — {match_rate:.1%} match rate[/]")
+    console.print(f"  [green][OK] Replay complete — {match_rate:.1%} match rate[/]")
 
     return match_rate, mismatches

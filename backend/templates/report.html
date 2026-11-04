@@ -359,10 +359,10 @@
 
 <!-- ═══ HEADER ═══ -->
 <div class="header">
-  <h1>Parity Report — <span class="module-name">{{ module_name }}</span></h1>
+  <h1>Parity Report — <span class="module-name">{{ module_name|default('module', true) }}</span></h1>
   <p class="subtitle">
-    Verified identical on <span class="count">{{ verified_count }}</span> of
-    <span class="count">{{ total_inputs }}</span> recorded behaviors
+    Verified identical on <span class="count">{{ verified_count|default(0, true) }}</span> of
+    <span class="count">{{ total_inputs|default(0, true) }}</span> recorded behaviors
   </p>
 </div>
 
@@ -372,51 +372,51 @@
   <div class="cards">
     <div class="card">
       <div class="label">First-Pass Rate</div>
-      <div class="value {{ first_pass_color }}">{{ "%.1f"|format(first_pass_rate * 100) }}%</div>
+      <div class="value {{ first_pass_color|default('rate-green', true) }}">{{ "%.1f"|format((first_pass_rate|default(0, true) or 0) * 100) }}%</div>
       <div class="detail">Before any debugging</div>
     </div>
     <div class="card">
       <div class="label">Final Rate</div>
-      <div class="value {{ final_color }}">{{ "%.1f"|format(final_rate * 100) }}%</div>
-      <div class="detail">After {{ repair_rounds }} debug round{{ 's' if repair_rounds != 1 }}</div>
+      <div class="value {{ final_color|default('rate-green', true) }}">{{ "%.1f"|format((final_rate|default(0, true) or 0) * 100) }}%</div>
+      <div class="detail">After {{ repair_rounds|default(0, true) or 0 }} debug round{{ 's' if (repair_rounds|default(0, true)) != 1 }}</div>
     </div>
     <div class="card">
       <div class="label">Held-Out Rate</div>
-      <div class="value {{ held_out_color }}">{{ "%.1f"|format(held_out_rate * 100) }}%</div>
+      <div class="value {{ held_out_color|default('rate-green', true) }}">{{ "%.1f"|format((held_out_rate|default(0, true) or 0) * 100) }}%</div>
       <div class="detail">Unseen test inputs</div>
     </div>
     <div class="card">
       <div class="label">Adversarial Breaks</div>
-      <div class="value {% if adversarial_breaks > 0 %}rate-red{% else %}rate-green{% endif %}">{{ adversarial_breaks }}</div>
-      <div class="detail">{{ adversarial_fixed }} fixed by patching</div>
+      <div class="value {% if (adversarial_breaks|default(0, true) or 0) > 0 %}rate-red{% else %}rate-green{% endif %}">{{ adversarial_breaks|default(0, true) or 0 }}</div>
+      <div class="detail">{{ adversarial_fixed|default(0, true) or 0 }} fixed by patching</div>
     </div>
   </div>
 
   <!-- ═══ BAR CHART ═══ -->
   <div class="section">
-    <h2 class="section-title"><span class="icon">📊</span> Match Rate Progression</h2>
+    <h2 class="section-title">Match Rate Progression</h2>
     <div class="chart-container">
       <div class="bar-row">
         <div class="bar-label">First-Pass</div>
         <div class="bar-track">
-          <div class="bar-fill {{ first_pass_bar }}" style="width: {{ (first_pass_rate * 100)|round|int }}%">
-            {{ "%.1f"|format(first_pass_rate * 100) }}%
+          <div class="bar-fill {{ first_pass_bar|default('green', true) }}" style="width: {{ ((first_pass_rate|default(0, true) or 0) * 100)|round|int }}%">
+            {{ "%.1f"|format((first_pass_rate|default(0, true) or 0) * 100) }}%
           </div>
         </div>
       </div>
       <div class="bar-row">
         <div class="bar-label">Final</div>
         <div class="bar-track">
-          <div class="bar-fill {{ final_bar }}" style="width: {{ (final_rate * 100)|round|int }}%">
-            {{ "%.1f"|format(final_rate * 100) }}%
+          <div class="bar-fill {{ final_bar|default('green', true) }}" style="width: {{ ((final_rate|default(0, true) or 0) * 100)|round|int }}%">
+            {{ "%.1f"|format((final_rate|default(0, true) or 0) * 100) }}%
           </div>
         </div>
       </div>
       <div class="bar-row">
         <div class="bar-label">Held-Out</div>
         <div class="bar-track">
-          <div class="bar-fill {{ held_out_bar }}" style="width: {{ (held_out_rate * 100)|round|int }}%">
-            {{ "%.1f"|format(held_out_rate * 100) }}%
+          <div class="bar-fill {{ held_out_bar|default('green', true) }}" style="width: {{ ((held_out_rate|default(0, true) or 0) * 100)|round|int }}%">
+            {{ "%.1f"|format((held_out_rate|default(0, true) or 0) * 100) }}%
           </div>
         </div>
       </div>
@@ -425,9 +425,9 @@
 
   <!-- ═══ AGENT TIMELINE ═══ -->
   <div class="section">
-    <h2 class="section-title"><span class="icon">🕐</span> Agent Timeline</h2>
+    <h2 class="section-title">Agent Timeline</h2>
     <div class="timeline">
-      {% for stage in timeline %}
+      {% for stage in (timeline or []) %}
       <div class="timeline-item">
         <div class="stage">{{ stage.name }}</div>
         <div class="description">{{ stage.description }}</div>
@@ -440,7 +440,7 @@
   <!-- ═══ REMAINING DIFFERENCES ═══ -->
   {% if remaining_mismatches %}
   <div class="section">
-    <h2 class="section-title"><span class="icon">⚠️</span> Remaining Differences</h2>
+    <h2 class="section-title">Remaining Differences</h2>
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
@@ -471,7 +471,7 @@
   <!-- ═══ QUIRK TABLE ═══ -->
   {% if quirks %}
   <div class="section">
-    <h2 class="section-title"><span class="icon">🔍</span> Quirk Triage</h2>
+    <h2 class="section-title">Quirk Triage</h2>
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
@@ -508,7 +508,7 @@
   <!-- ═══ BEHAVIOR CONTRACT ═══ -->
   {% if behavior_contract %}
   <div class="section">
-    <h2 class="section-title"><span class="icon">📜</span> Behavior Contract</h2>
+    <h2 class="section-title">Behavior Contract</h2>
     <ol class="contract-list">
       {% for rule in behavior_contract %}
       <li>
@@ -522,30 +522,32 @@
 
   <!-- ═══ NOT VERIFIED ═══ -->
   <div class="section">
-    <h2 class="section-title"><span class="icon">ℹ️</span> Scope & Limitations</h2>
+    <h2 class="section-title">Scope & Limitations</h2>
     <div class="info-grid">
       <div class="info-item">
         <div class="info-label">Total Test Inputs</div>
-        <div class="info-value">{{ total_inputs }}</div>
+        <div class="info-value">{{ total_inputs|default(0, true) }}</div>
       </div>
       <div class="info-item">
         <div class="info-label">Golden File Hash</div>
-        <div class="info-value">{{ golden_hash[:16] }}…</div>
+        <div class="info-value">{{ golden_hash[:16] if golden_hash else 'n/a' }}…</div>
       </div>
       <div class="info-item">
         <div class="info-label">Wall Clock Time</div>
-        <div class="info-value">{{ "%.1f"|format(wall_clock_seconds) }}s</div>
+        <div class="info-value">{{ "%.1f"|format(wall_clock_seconds|default(0, true) or 0) }}s</div>
       </div>
       <div class="info-item">
         <div class="info-label">Total Cost</div>
-        <div class="info-value">${{ "%.4f"|format(total_cost) }}</div>
+        <div class="info-value">${{ "%.4f"|format(total_cost|default(0, true) or 0) }}</div>
       </div>
+      {% if seeds %}
       {% for seed_name, seed_val in seeds.items() %}
       <div class="info-item">
         <div class="info-label">Seed: {{ seed_name }}</div>
         <div class="info-value">{{ seed_val }}</div>
       </div>
       {% endfor %}
+      {% endif %}
       <div class="info-item">
         <div class="info-label">Scope Limits</div>
         <div class="info-value">Single-module, no concurrency, no I/O side-effects</div>
@@ -556,12 +558,11 @@
   <!-- ═══ USAGE LEDGER ═══ -->
   {% if usage_ledger %}
   <div class="section">
-    <h2 class="section-title"><span class="icon">💰</span> Usage Ledger</h2>
+    <h2 class="section-title">Usage Ledger</h2>
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
-            <th>Provider</th>
             <th>Model</th>
             <th>Role</th>
             <th>Purpose</th>
@@ -573,7 +574,6 @@
         <tbody>
           {% for u in usage_ledger %}
           <tr>
-            <td>{{ u.provider }}</td>
             <td class="mono" style="font-size:0.8rem;">{{ u.model }}</td>
             <td>{{ u.role }}</td>
             <td style="font-size:0.85rem; max-width:200px;">{{ u.purpose }}</td>
@@ -583,9 +583,9 @@
           </tr>
           {% endfor %}
           <tr style="font-weight:600; background: var(--dark);">
-            <td colspan="4" style="text-align:right;">TOTAL</td>
-            <td class="mono">{{ total_tokens_in }}/{{ total_tokens_out }}</td>
-            <td class="mono">${{ "%.4f"|format(total_cost) }}</td>
+            <td colspan="3" style="text-align:right;">TOTAL</td>
+            <td class="mono">{{ total_tokens_in|default(0, true) }}/{{ total_tokens_out|default(0, true) }}</td>
+            <td class="mono">${{ "%.4f"|format(total_cost|default(0, true) or 0) }}</td>
             <td></td>
           </tr>
         </tbody>
@@ -598,10 +598,11 @@
 
 <!-- ═══ FOOTER ═══ -->
 <div class="footer">
-  <div class="brand">⚖️ Parity</div>
+  <div class="brand">Parity</div>
   <div>Behavioral equivalence verification for legacy code migration</div>
-  <div class="built-with">✨ Built with Muse Spark Open</div>
-  <div style="margin-top: 0.75rem; font-size: 0.8rem;">Generated {{ timestamp }}</div>
+  <div class="built-with">Built with Muse Spark Open</div>
+  <div style="margin-top: 0.5rem;"><a href="https://github.com/DevKumar005/Parity" target="_blank" rel="noopener noreferrer">GitHub Repository</a></div>
+  <div style="margin-top: 0.75rem; font-size: 0.8rem;">Generated {{ timestamp|default('n/a', true) }}</div>
 </div>
 
 </body>

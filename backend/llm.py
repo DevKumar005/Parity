@@ -555,7 +555,7 @@ class ResponseCache:
     def get(self, messages: list[dict]) -> LLMResponse | None:
         path = self._dir / f"{self._key(messages)}.json"
         if path.exists():
-            data = json.loads(path.read_text())
+            data = json.loads(path.read_text(encoding="utf-8"))
             return LLMResponse(
                 content=data["content"],
                 input_tokens=data["input_tokens"],
@@ -575,7 +575,7 @@ class ResponseCache:
             "output_tokens": response.output_tokens,
             "model": response.model,
             "provider": response.provider,
-        }))
+        }), encoding="utf-8")
 
 
 

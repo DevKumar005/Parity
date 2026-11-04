@@ -175,14 +175,19 @@ def trigger_run(req: RunRequest) -> dict[str, Any]:
             temp_file.unlink()
 
 
+class EvaluateRequest(BaseModel):
+    seed: int = 42
+
+
 @app.post("/api/evaluate")
-def evaluate_all(seed: int = 42) -> dict[str, Any]:
+def evaluate_all(req: Optional[EvaluateRequest] = None, seed: Optional[int] = None) -> dict[str, Any]:
     """Execute evaluation across all sample modules and return summary."""
+    active_seed = seed if seed is not None else (req.seed if req else 42)
     legacy_dir = SAMPLES_DIR / "legacy"
     results = []
     for c_file in sorted(legacy_dir.glob("*.c")):
         try:
-            res = run_pipeline(source_path=c_file, seed=seed)
+            res = run_pipeline(source_path=c_file, seed=active_seed)
             results.append({
                 "module_name": c_file.name,
                 "first_pass_match_rate": res.first_pass_match_rate,

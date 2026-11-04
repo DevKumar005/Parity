@@ -79,46 +79,46 @@ def _build_timeline(result: PipelineResult) -> list[dict[str, str]]:
     """Build a simplified agent timeline from the pipeline result."""
     stages = [
         {
-            "name": "🏛️ Archaeologist",
+            "name": "Archaeologist",
             "description": f"Extracted {len(result.signatures)} function signature(s) with probe notes",
             "duration": "",
         },
         {
-            "name": "🎯 Fuzzer",
+            "name": "Fuzzer",
             "description": f"Generated {result.total_inputs} test inputs across boundary, model, and mutation strategies",
             "duration": "",
         },
         {
-            "name": "🔨 Migrator",
+            "name": "Migrator",
             "description": "Translated C module to Python with semantic preservation",
             "duration": "",
         },
         {
-            "name": "📊 First-Pass Comparison",
+            "name": "First-Pass Comparison",
             "description": f"Matched {result.first_pass_match_rate * 100:.1f}% of golden records on initial migration",
             "duration": "",
         },
     ]
     if result.repair_rounds > 0:
         stages.append({
-            "name": f"🔧 Debugger ({result.repair_rounds} round{'s' if result.repair_rounds != 1 else ''})",
+            "name": f"Debugger ({result.repair_rounds} round{'s' if result.repair_rounds != 1 else ''})",
             "description": f"Diagnosed mismatches and applied patches → {result.final_match_rate * 100:.1f}% final rate",
             "duration": "",
         })
     if result.adversarial_breaks > 0 or result.adversarial_fixed > 0:
         stages.append({
-            "name": "🔴 Red Team",
+            "name": "Red Team",
             "description": f"Found {result.adversarial_breaks} adversarial breaks, fixed {result.adversarial_fixed}",
             "duration": "",
         })
     if result.quirks:
         stages.append({
-            "name": "🔍 Quirk Triage",
+            "name": "Quirk Triage",
             "description": f"Labeled {len(result.quirks)} suspicious behaviors with evidence",
             "duration": "",
         })
     stages.append({
-        "name": "✅ Held-Out Validation",
+        "name": "Held-Out Validation",
         "description": f"Validated on unseen inputs → {result.held_out_match_rate * 100:.1f}% match rate",
         "duration": f"Total wall clock: {result.wall_clock_seconds:.1f}s",
     })
@@ -317,7 +317,7 @@ def print_terminal_summary(result: PipelineResult) -> None:
         result: Complete pipeline result.
     """
     banner = Text()
-    banner.append("⚖️  Parity Results", style="bold bright_white")
+    banner.append("Parity Results", style="bold bright_white")
     banner.append(f" — {result.module_name}", style="bold magenta")
     console.print(Panel(banner, border_style="blue", padding=(0, 2)))
     console.print()
@@ -367,14 +367,14 @@ def print_terminal_summary(result: PipelineResult) -> None:
         quirk_table.add_column("Action", max_width=40)
 
         label_styles = {
-            QuirkLabel.LIKELY_BUG: ("🐛 LIKELY BUG", "bold red"),
-            QuirkLabel.LIKELY_INTENTIONAL: ("✅ INTENTIONAL", "bold green"),
-            QuirkLabel.UNCLEAR: ("❓ UNCLEAR", "bold yellow"),
+            QuirkLabel.LIKELY_BUG: ("LIKELY BUG", "bold red"),
+            QuirkLabel.LIKELY_INTENTIONAL: ("INTENTIONAL", "bold green"),
+            QuirkLabel.UNCLEAR: ("UNCLEAR", "bold yellow"),
         }
 
         for q in result.quirks:
             label_text, label_style = label_styles.get(
-                q.label, ("❓ UNCLEAR", "bold yellow")
+                q.label, ("UNCLEAR", "bold yellow")
             )
             quirk_table.add_row(
                 q.behavior,
@@ -424,18 +424,18 @@ def print_terminal_summary(result: PipelineResult) -> None:
 
     if result.final_match_rate >= 1.0:
         console.print(Panel(
-            "✅ [bold green]PERFECT MATCH[/] — Migration verified on all recorded behaviors",
+            "[bold green]PERFECT MATCH[/] — Migration verified on all recorded behaviors",
             border_style="green",
         ))
     elif result.final_match_rate >= 0.9:
         console.print(Panel(
-            f"⚠️  [bold yellow]NEAR MATCH[/] — {result.final_match_rate * 100:.1f}% verified, "
+            f"[bold yellow]NEAR MATCH[/] — {result.final_match_rate * 100:.1f}% verified, "
             f"{len(result.remaining_mismatches)} difference(s) remain",
             border_style="yellow",
         ))
     else:
         console.print(Panel(
-            f"❌ [bold red]SIGNIFICANT DIFFERENCES[/] — {result.final_match_rate * 100:.1f}% verified, "
+            f"[bold red]SIGNIFICANT DIFFERENCES[/] — {result.final_match_rate * 100:.1f}% verified, "
             f"{len(result.remaining_mismatches)} difference(s) remain",
             border_style="red",
         ))

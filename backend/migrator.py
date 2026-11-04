@@ -63,7 +63,7 @@ def migrate_module(
     Returns:
         Tuple of (migrated_code_string, path_to_migrated_file).
     """
-    console.rule("[bold cyan]🔄 Migrator — C → Python Migration[/]")
+    console.rule("[bold cyan]Migrator — C → Python Migration[/]")
 
     source_code = source_path.read_text(encoding="utf-8", errors="replace")
     module_name = source_path.stem
@@ -118,7 +118,7 @@ def migrate_module(
     migrated_code = _extract_code_from_response(response.content)
 
     if not migrated_code or migrated_code == "# No migration available":
-        console.print("  [red]✗ Migration produced no code![/]")
+        console.print("  [red][ERROR] Migration produced no code![/]")
         migrated_code = f'"""Migration stub for {module_name} — manual migration required."""\n'
 
     # Save migrated code
@@ -136,6 +136,6 @@ def migrate_module(
     console.print(f"  Output:    [dim]{migrated_path}[/]")
     console.print(f"  Baseline:  [dim]{baseline_path}[/]")
     console.print(f"  Lines:     {line_count}")
-    console.print(f"  [green]✓ Migration complete[/]")
+    console.print(f"  [green][OK] Migration complete[/]")
 
     return migrated_code, migrated_path

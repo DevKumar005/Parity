@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta property="og:title" content="Parity Score — {{ module_name }}">
-<meta property="og:description" content="Verified {{ '%.0f'|format((score or 0) * 100) }}% behavioral equivalence">
+<meta property="og:title" content="Parity Score — {{ module_name|default('module', true) }}">
+<meta property="og:description" content="Verified {{ '%.0f'|format((score|default(0, true) or 0) * 100) }}% behavioral equivalence">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<title>Parity Score — {{ module_name }}</title>
+<title>Parity Score — {{ module_name|default('module', true) }}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap');
 
@@ -294,43 +294,42 @@
 </head>
 <body>
 
-<div class="card" style="--score-color: {{ score_color|default('#22c55e') }}; --glow-color: {{ glow_color|default('#22c55e') }}; --first-pass-color: {{ first_pass_color|default('#ef4444') }}; --final-color: {{ final_color|default('#22c55e') }};">
+<div class="card" style="--score-color: {{ score_color|default('#22c55e', true) }}; --glow-color: {{ glow_color|default('#22c55e', true) }}; --first-pass-color: {{ first_pass_color|default('#ef4444', true) }}; --final-color: {{ final_color|default('#22c55e', true) }};">
   <div class="score-ring"></div>
 
   <div class="card-header">
     <div class="logo">
-      <span class="icon">⚖️</span>
       <span>Parity</span>
     </div>
-    <div class="module-label">{{ module_name }}</div>
+    <div class="module-label">{{ module_name|default('module', true) }}</div>
   </div>
 
   <div class="card-content">
     <div class="score-section">
       <div class="score-label">Behavioral Match Score</div>
       <div class="score-value">
-        {{ '%.0f'|format(((score if score is not none else 0)) * 100) }}<span class="score-unit">%</span>
+        {{ '%.0f'|format((score|default(0, true) or 0) * 100) }}<span class="score-unit">%</span>
       </div>
     </div>
 
     <div class="progression">
       <span>First-Pass</span>
-      <span class="rate rate-first">{{ '%.0f'|format(((first_pass_rate if first_pass_rate is not none else 0)) * 100) }}%</span>
+      <span class="rate rate-first">{{ '%.0f'|format((first_pass_rate|default(0, true) or 0) * 100) }}%</span>
       <span class="arrow">→</span>
       <span>Final</span>
-      <span class="rate rate-final">{{ '%.0f'|format(((final_rate if final_rate is not none else 0)) * 100) }}%</span>
+      <span class="rate rate-final">{{ '%.0f'|format((final_rate|default(0, true) or 0) * 100) }}%</span>
     </div>
 
-    {% if scariest_bug %}
+    {% if scariest_bug is defined and scariest_bug %}
     <div class="bug-callout">
-      <div class="bug-label"><span>🐛</span> Scariest Bug Found</div>
+      <div class="bug-label">Scariest Bug Found</div>
       <div class="bug-text">{{ scariest_bug }}</div>
     </div>
     {% endif %}
   </div>
 
   <div class="card-footer">
-    <div class="built-badge">✨ Built with Muse Spark Open</div>
+    <div class="built-badge">Built with Muse Spark Open</div>
   </div>
 </div>
 

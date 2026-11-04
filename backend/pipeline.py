@@ -92,7 +92,7 @@ def run_pipeline(
         llm=llm,
         seed=seed,
     )
-    console.print(f"[green]✔ Total test inputs generated: {len(inputs)}[/green]")
+    console.print(f"[green][OK] Total test inputs generated: {len(inputs)}[/green]")
 
     # Stage 3: Recorder
     console.print("\n[bold]Stage 3: Recorder (Compile, Execute & Hash Golden Records)[/bold]")
@@ -101,7 +101,7 @@ def run_pipeline(
         inputs=inputs,
         run_dir=run_dir,
     )
-    console.print(f"[bold green]✔ Golden file created: {len(golden.records)} records[/bold green]")
+    console.print(f"[bold green][OK] Golden file created: {len(golden.records)} records[/bold green]")
     console.print(f"[dim]Immutable SHA-256 Hash: {golden.hash}[/dim]")
 
     # Stage 4: Migrator
@@ -207,7 +207,7 @@ def run_pipeline(
     print_terminal_summary(result)
 
     console.print(
-        f"\n[bold green]✔ Parity run complete in {wall_clock:.1f}s![/bold green]\n"
+        f"\n[bold green][OK] Parity run complete in {wall_clock:.1f}s![/bold green]\n"
         f"  [cyan]Report:[/cyan] file://{report_path}\n"
         f"  [cyan]Scorecard:[/cyan] file://{scorecard_path}\n"
     )

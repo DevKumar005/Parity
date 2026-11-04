@@ -25,7 +25,7 @@ fi
 PYTHONPATH=. "$PYTHON_EXEC" -m backend.cli info
 
 echo ""
-echo "▶ Running autonomous verification on development module: tiered_pricing.c..."
+echo "Running autonomous verification on development module: tiered_pricing.c..."
 echo ""
 
 # Run pipeline on tiered_pricing.c
@@ -33,7 +33,7 @@ PYTHONPATH=. "$PYTHON_EXEC" -m backend.cli run samples/legacy/tiered_pricing.c -
 
 echo ""
 echo "============================================================"
-echo "✔ Demo run complete!"
+echo "Demo run complete!"
 echo "  - Check runs/ for latest artifacts, golden files, and HTML reports"
 echo "  - Start the interactive dashboard anytime with: parity serve"
 echo "============================================================"

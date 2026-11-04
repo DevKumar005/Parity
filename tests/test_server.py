@@ -46,3 +46,18 @@ def test_api_runs_latest():
     r_sc = client.get("/api/runs/latest/scorecard")
     assert r_sc.status_code == 200
     assert "<!DOCTYPE html>" in r_sc.text
+
+
+def test_api_runs_list():
+    response = client.get("/api/runs")
+    assert response.status_code == 200
+    runs = response.json()
+    assert isinstance(runs, list)
+
+
+def test_api_evaluate():
+    response = client.post("/api/evaluate", json={"seed": 42})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert len(data["results"]) >= 3

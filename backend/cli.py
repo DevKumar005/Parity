@@ -116,7 +116,7 @@ def evaluate_command(
     console.print(f"[bold]Evaluating {len(c_files)} legacy module(s)...[/bold]\n")
 
     for c_file in c_files:
-        console.print(f"[bold cyan]▶ Testing module: {c_file.name}[/bold cyan]")
+        console.print(f"[bold cyan]Testing module: {c_file.name}[/bold cyan]")
         res = run_pipeline(source_path=c_file, seed=seed, skip_redteam=False)
         results.append(res)
         console.print("\n" + "=" * 60 + "\n")

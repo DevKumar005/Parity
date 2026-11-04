@@ -177,7 +177,7 @@ def _compile_driver(driver_path: Path, run_dir: Path) -> Path:
         console.print(f"  [red]Compilation failed:[/]\n{result.stderr}")
         raise RuntimeError(f"Compilation failed:\n{result.stderr}")
 
-    console.print("  [green]✓ Compilation succeeded[/]")
+    console.print("  [green][OK] Compilation succeeded[/]")
     return binary_path
 
 
@@ -200,9 +200,9 @@ def _run_driver(binary_path: Path, timeout: int = 30) -> list[dict]:
         try:
             records.append(json.loads(line))
         except json.JSONDecodeError:
-            console.print(f"  [yellow]⚠ Skipping unparseable line: {line[:80]}[/]")
+            console.print(f"  [yellow][WARN] Skipping unparseable line: {line[:80]}[/]")
 
-    console.print(f"  [green]✓ Driver produced {len(records)} records[/]")
+    console.print(f"  [green][OK] Driver produced {len(records)} records[/]")
     return records
 
 
@@ -225,7 +225,7 @@ def record_golden(
     Returns:
         Immutable GoldenFile with all recorded behaviors.
     """
-    console.rule("[bold cyan]📼 Recorder — Recording Golden Output[/]")
+    console.rule("[bold cyan]Recorder — Recording Golden Output[/]")
 
     run_dir.mkdir(parents=True, exist_ok=True)
 
@@ -305,6 +305,6 @@ def record_golden(
     console.print(f"  Golden file: [dim]{golden_path}[/]")
     console.print(f"  SHA-256:     [dim]{golden.hash[:16]}…[/]")
     console.print(f"  Records:     {len(golden.records)}")
-    console.print(f"  [green]✓ Golden recording complete (immutable)[/]")
+    console.print(f"  [green][OK] Golden recording complete (immutable)[/]")
 
     return golden

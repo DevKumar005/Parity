@@ -287,7 +287,7 @@ def repair_loop(
     )
 
     if not current_mismatches:
-        console.print("[green]✔ First-pass migration already achieves 100% parity![/green]")
+        console.print("[green][OK] First-pass migration already achieves 100% parity![/green]")
         return current_code, 1.0, [], []
 
     patch_history: list[PatchResult] = []
@@ -300,7 +300,7 @@ def repair_loop(
 
     for round_num in range(1, max_rounds + 1):
         if not current_mismatches or current_rate >= 1.0:
-            console.print(f"[bold green]✔ Reached 100% equivalence at round {round_num - 1}![/bold green]")
+            console.print(f"[bold green][OK] Reached 100% equivalence at round {round_num - 1}![/bold green]")
             break
 
         console.print(f"[cyan]── Debugger Round {round_num}/{max_rounds} ──[/cyan]")

@@ -383,7 +383,7 @@
             <option value="tiered_pricing.c">tiered_pricing.c (Dev Set · 32-bit integer overflow)</option>
             <option value="invoice_total.c">invoice_total.c (Held-Out · Half-up vs Banker's rounding)</option>
             <option value="proration.c">proration.c (Held-Out · C Truncation vs Python Floor Div)</option>
-            <option value="custom">✍️ Custom C Code (Paste your own pure function)</option>
+            <option value="custom">Custom C Code (Paste your own pure function)</option>
           </select>
         </div>
 
@@ -838,7 +838,7 @@
   <!-- ========================================================================= -->
   <!-- IN-APP MODAL VIEWER FOR REPORTS & SCORE CARDS                             -->
   <!-- ========================================================================= -->
-  <div id="artifactModal" onclick="if(event.target === this) closeArtifactModal()"
+  <div id="artifactModal" onclick="if (event.target === this) { closeArtifactModal(); }"
     class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-2 sm:p-4">
     <div
       class="bg-white rounded-2xl max-w-5xl w-full h-[92vh] sm:h-[85vh] flex flex-col shadow-2xl border border-[#deded8] overflow-hidden">
@@ -884,6 +884,11 @@
   <footer class="w-full border-t border-[#e8e8e3] bg-[#f7f7f5] text-[#777777] text-xs py-5 px-4 text-center mt-auto">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
       <span>Built for Meta Global AI Hackathon</span>
+      <a href="https://github.com/DevKumar005/Parity" target="_blank" rel="noopener noreferrer"
+        class="inline-flex items-center space-x-1.5 text-[#555555] hover:text-[#111111] transition-colors font-medium">
+        <i class="fa-brands fa-github text-sm"></i>
+        <span>GitHub Repository</span>
+      </a>
       <span>Indie Developer Track · Push the Frontier (Software)</span>
     </div>
   </footer>
@@ -1050,7 +1055,7 @@ int prorate_charge(int monthly_cents, int start_day, int end_day, int year, int 
               });
               const customOpt = document.createElement('option');
               customOpt.value = 'custom';
-              customOpt.innerText = '✍️ Custom C Code (Paste your own pure function)';
+              customOpt.innerText = 'Custom C Code (Paste your own pure function)';
               selectEl.appendChild(customOpt);
 
               if ([...selectEl.options].some(o => o.value === currentVal)) {
@@ -1084,27 +1089,29 @@ int prorate_charge(int monthly_cents, int start_day, int end_day, int year, int 
     }
 
     function onModuleChange() {
-      const sel = document.getElementById('studioModuleSelect').value;
+      const selectEl = document.getElementById('studioModuleSelect');
+      if (!selectEl) return;
+      const sel = selectEl.value;
       const customDrawer = document.getElementById('studioCustomDrawer');
       const quirkBadge = document.getElementById('studioQuirkBadge');
       const cSourceTitle = document.getElementById('cSourceTitle');
       const cCodePreview = document.getElementById('cCodePreview');
 
       if (sel === 'custom') {
-        customDrawer.classList.remove('hidden');
-        quirkBadge.innerText = 'custom pure logic';
-        cSourceTitle.innerText = 'Custom Pure C Source';
+        if (customDrawer) customDrawer.classList.remove('hidden');
+        if (quirkBadge) quirkBadge.innerText = 'custom pure logic';
+        if (cSourceTitle) cSourceTitle.innerText = 'Custom Pure C Source';
         const customCodeInput = document.getElementById('studioCustomCode');
-        cCodePreview.innerText = customCodeInput.value || '// Enter custom pure C function above';
+        if (cCodePreview) cCodePreview.innerText = (customCodeInput && customCodeInput.value) || '// Enter custom pure C function above';
         return;
       }
 
-      customDrawer.classList.add('hidden');
+      if (customDrawer) customDrawer.classList.add('hidden');
       const mod = modulesList.find(m => m.filename === sel);
       if (mod) {
-        quirkBadge.innerText = (mod.planted_quirks && mod.planted_quirks[0]) || 'Legacy billing function';
-        cSourceTitle.innerText = `${mod.filename} (${mod.set || 'Dev'})`;
-        cCodePreview.innerText = mod.code;
+        if (quirkBadge) quirkBadge.innerText = (mod.planted_quirks && mod.planted_quirks[0]) || 'Legacy billing function';
+        if (cSourceTitle) cSourceTitle.innerText = `${mod.filename} (${mod.set || 'Dev'})`;
+        if (cCodePreview) cCodePreview.innerText = mod.code;
       }
     }
 
@@ -1124,8 +1131,9 @@ int compute_volume_discount(int price_cents, int quantity) {
     return total_raw - discount;
 }`;
       const ta = document.getElementById('studioCustomCode');
-      ta.value = code;
-      document.getElementById('cCodePreview').innerText = code;
+      if (ta) ta.value = code;
+      const preview = document.getElementById('cCodePreview');
+      if (preview) preview.innerText = code;
     }
 
     async function runStudioVerification() {
@@ -1269,6 +1277,7 @@ int compute_volume_discount(int price_cents, int quantity) {
        ------------------------------------------------------------------------- */
     async function fetchRunsList() {
       const tbody = document.getElementById('runsListBody');
+      if (!tbody) return;
       try {
         const res = await fetch('/api/runs');
         const runs = await res.json();
@@ -1303,12 +1312,13 @@ int compute_volume_discount(int price_cents, int quantity) {
       const title = document.getElementById('modalTitle');
       const subtitle = document.getElementById('modalSubtitle');
       const ext = document.getElementById('modalExternalLink');
+      const modal = document.getElementById('artifactModal');
 
-      iframe.src = currentRunData.reportUrl;
-      title.innerText = 'Full Differential Parity Report';
-      subtitle.innerText = currentRunData.reportUrl;
-      ext.href = currentRunData.reportUrl;
-      document.getElementById('artifactModal').classList.remove('hidden');
+      if (iframe) iframe.src = currentRunData.reportUrl;
+      if (title) title.innerText = 'Full Differential Parity Report';
+      if (subtitle) subtitle.innerText = currentRunData.reportUrl;
+      if (ext) ext.href = currentRunData.reportUrl;
+      if (modal) modal.classList.remove('hidden');
     }
 
     function openScorecardModal() {
@@ -1316,12 +1326,13 @@ int compute_volume_discount(int price_cents, int quantity) {
       const title = document.getElementById('modalTitle');
       const subtitle = document.getElementById('modalSubtitle');
       const ext = document.getElementById('modalExternalLink');
+      const modal = document.getElementById('artifactModal');
 
-      iframe.src = currentRunData.scorecardUrl;
-      title.innerText = 'Parity Score Card';
-      subtitle.innerText = currentRunData.scorecardUrl;
-      ext.href = currentRunData.scorecardUrl;
-      document.getElementById('artifactModal').classList.remove('hidden');
+      if (iframe) iframe.src = currentRunData.scorecardUrl;
+      if (title) title.innerText = 'Parity Score Card';
+      if (subtitle) subtitle.innerText = currentRunData.scorecardUrl;
+      if (ext) ext.href = currentRunData.scorecardUrl;
+      if (modal) modal.classList.remove('hidden');
     }
 
     function viewReport(runId) {
@@ -1335,8 +1346,10 @@ int compute_volume_discount(int price_cents, int quantity) {
     }
 
     function closeArtifactModal() {
-      document.getElementById('artifactModal').classList.add('hidden');
-      document.getElementById('modalIframe').src = 'about:blank';
+      const modal = document.getElementById('artifactModal');
+      const iframe = document.getElementById('modalIframe');
+      if (modal) modal.classList.add('hidden');
+      if (iframe) iframe.src = 'about:blank';
     }
 
     let toastTimeout = null;

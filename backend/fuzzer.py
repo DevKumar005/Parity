@@ -168,7 +168,7 @@ def _generate_model_edge_cases(
                 source="model",
             ))
     except (json.JSONDecodeError, KeyError, TypeError) as exc:
-        console.print(f"  [yellow]⚠ Edge case parse error: {exc}[/]")
+        console.print(f"  [yellow][WARN] Edge case parse error: {exc}[/]")
 
     return inputs
 
@@ -259,7 +259,7 @@ def generate_inputs(
     Returns:
         Deduplicated list of test inputs (target: 300+ per function).
     """
-    console.rule("[bold cyan]🎲 Fuzzer — Generating Test Inputs[/]")
+    console.rule("[bold cyan]Fuzzer — Generating Test Inputs[/]")
     rng = random.Random(seed)
     all_inputs: list[TestInput] = []
 
@@ -296,6 +296,6 @@ def generate_inputs(
 
     source_counts = Counter(inp.source for inp in all_inputs)
     console.print(f"  By source: {dict(source_counts)}")
-    console.print(f"  [green]✓ Generated {len(all_inputs)} total inputs[/]")
+    console.print(f"  [green][OK] Generated {len(all_inputs)} total inputs[/]")
 
     return all_inputs

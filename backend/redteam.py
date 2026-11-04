@@ -163,9 +163,9 @@ def red_team_check(
     breaks_fixed = 0  # In current flow, breaks found after convergence
 
     if breaks_found == 0:
-        console.print("[bold green]✔ Red team found 0 equivalence breaks! Migrated code holds under attack.[/bold green]")
+        console.print("[bold green][OK] Red team found 0 equivalence breaks! Migrated code holds under attack.[/bold green]")
     else:
-        console.print(f"[bold red]⚠ Red team uncovered {breaks_found} equivalence break(s)![/bold red]")
+        console.print(f"[bold red][WARN] Red team uncovered {breaks_found} equivalence break(s)![/bold red]")
         for m in mismatches[:3]:
             console.print(f"  [red]• {m.input.function_name}{m.input.args}: C returned {m.expected!r}, Python returned {m.actual!r}[/red]")
 

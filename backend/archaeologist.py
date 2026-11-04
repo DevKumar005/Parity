@@ -92,7 +92,7 @@ def analyze_module(source_path: Path, llm: LLMClient) -> list[FunctionSignature]
     Returns:
         List of extracted function signatures with analysis notes.
     """
-    console.rule("[bold cyan]🔍 Archaeologist — Analyzing Legacy Module[/]")
+    console.rule("[bold cyan]Archaeologist — Analyzing Legacy Module[/]")
     source_code = source_path.read_text(encoding="utf-8", errors="replace")
     module_name = source_path.stem
 
@@ -141,7 +141,7 @@ def analyze_module(source_path: Path, llm: LLMClient) -> list[FunctionSignature]
                 notes=fn.get("notes", ""),
             ))
     except (json.JSONDecodeError, KeyError, IndexError, TypeError) as exc:
-        console.print(f"  [yellow]⚠ LLM response parse error: {exc}. Falling back to regex.[/]")
+        console.print(f"  [yellow][WARN] LLM response parse error: {exc}. Falling back to regex.[/]")
 
     regex_sigs = _regex_extract(source_code)
 
@@ -157,7 +157,7 @@ def analyze_module(source_path: Path, llm: LLMClient) -> list[FunctionSignature]
                 signatures.append(rs)
 
     if not signatures:
-        console.print("  [red]✗ No functions found![/]")
+        console.print("  [red][ERROR] No functions found![/]")
         return signatures
 
     table = Table(title="Extracted Signatures", show_lines=True)
@@ -171,6 +171,6 @@ def analyze_module(source_path: Path, llm: LLMClient) -> list[FunctionSignature]
         table.add_row(sig.name, sig.return_type, param_str, sig.notes or "—")
 
     console.print(table)
-    console.print(f"  [green]✓ Found {len(signatures)} function(s)[/]")
+    console.print(f"  [green][OK] Found {len(signatures)} function(s)[/]")
 
     return signatures
