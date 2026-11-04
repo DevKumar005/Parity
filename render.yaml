@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: parity
+    env: docker
+    plan: free
+    dockerfilePath: Dockerfile
+    healthCheckPath: /api/status
+    envVars:
+      - key: PARITY_PROVIDERS
+        value: mock
+      - key: BASETEN_MODEL_ID
+        value: muse-spark-open-1026
+
