@@ -124,6 +124,7 @@ BASETEN_MODEL_ID=muse-spark-open-1026
 We welcome contributions to Parity! Whether you want to add new legacy C billing edge cases, improve agent prompts, expand red-teaming strategies, or enhance the dashboard visualizer:
 
 ### How to Contribute
+
 1. **Fork the Repository**: Create your own feature branch (`git checkout -b feature/new-billing-sample`).
 2. **Add Legacy Modules**:
    - Place pure C functions in `samples/legacy/<module_name>.c`.
